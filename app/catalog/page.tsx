@@ -57,6 +57,7 @@ export default function Catalog() {
             budget="$$"
             stock={80}
             price={11}
+            slug="black-keyboard-1"
           />
           <ProductCard 
             imageUrl="/main-banner-white.png"
@@ -64,6 +65,7 @@ export default function Catalog() {
             budget="$$$"
             stock={25}
             price={15}
+            slug="white-keyboard-1"
           />
         </div>
       </div>
