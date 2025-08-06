@@ -4,6 +4,7 @@ import * as React from 'react';
 import FilterPanel from '@/components/custom/filter-panel';
 import Header from '@/components/custom/header';
 import FilterBreadcrumbs from '@/components/custom/filter-breadcrumbs';
+import ProductCard from '@/components/custom/product-card';
 import { ProductTypes, Budget } from '@/lib/types';
 
 export default function Catalog() {
@@ -49,8 +50,21 @@ export default function Catalog() {
         />
 
         {/* Cards */}
-        <div>
-          <div className="w-1/4 h-1/4 bg-red-100">test</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <ProductCard 
+            imageUrl="/main-banner-black.png"
+            title="Black Keyboard"
+            budget="$$"
+            stock={80}
+            price={11}
+          />
+          <ProductCard 
+            imageUrl="/main-banner-white.png"
+            title="White Keyboard"
+            budget="$$$"
+            stock={25}
+            price={15}
+          />
         </div>
       </div>
     </div>
