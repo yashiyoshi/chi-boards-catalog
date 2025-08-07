@@ -54,6 +54,7 @@ export default function FilterPanel({
   const [isProductTypeOpen, setIsProductTypeOpen] = React.useState(false);
   const [isKeyboardsOpen, setIsKeyboardsOpen] = React.useState(false);
   const [isSwitchesOpen, setIsSwitchesOpen] = React.useState(false);
+  const [isKeycapsOpen, setIsKeycapsOpen] = React.useState(false);
   const [isBudgetOpen, setIsBudgetOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -75,9 +76,12 @@ export default function FilterPanel({
       keyboardsTKL: false,
       switchesLinear: false,
       switchesTactile: false,
-      switchesClicky: false,
-      deskpads: false,
-      keycaps: false,
+      switchesSilentLinear: false,
+      switchesMagnetic: false,
+      keycapsCherry: false,
+      keycapsXDA: false,
+      keycapsOEM: false,
+      keycapsOther: false,
     });
     setBudget({
       under50: false,
@@ -158,32 +162,63 @@ export default function FilterPanel({
                   Tactile
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.switchesClicky}
+                  checked={productTypes.switchesSilentLinear}
                   onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, switchesClicky: !!checked }))
+                    setProductTypes((prev) => ({ ...prev, switchesSilentLinear: !!checked }))
                   }
                 >
-                  Clicky
+                  Silent Linear
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={productTypes.switchesMagnetic}
+                  onCheckedChange={(checked) =>
+                    setProductTypes((prev) => ({ ...prev, switchesMagnetic: !!checked }))
+                  }
+                >
+                  Magnetic
                 </DropdownMenuCheckboxItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
-          <DropdownMenuCheckboxItem
-            checked={productTypes.deskpads}
-            onCheckedChange={(checked) =>
-              setProductTypes((prev) => ({ ...prev, deskpads: !!checked }))
-            }
-          >
-            Deskpads
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={productTypes.keycaps}
-            onCheckedChange={(checked) =>
-              setProductTypes((prev) => ({ ...prev, keycaps: !!checked }))
-            }
-          >
-            Keycaps
-          </DropdownMenuCheckboxItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>Keycaps</DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuCheckboxItem
+                  checked={productTypes.keycapsCherry}
+                  onCheckedChange={(checked) =>
+                    setProductTypes((prev) => ({ ...prev, keycapsCherry: !!checked }))
+                  }
+                >
+                  Cherry
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={productTypes.keycapsXDA}
+                  onCheckedChange={(checked) =>
+                    setProductTypes((prev) => ({ ...prev, keycapsXDA: !!checked }))
+                  }
+                >
+                  XDA
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={productTypes.keycapsOEM}
+                  onCheckedChange={(checked) =>
+                    setProductTypes((prev) => ({ ...prev, keycapsOEM: !!checked }))
+                  }
+                >
+                  OEM
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={productTypes.keycapsOther}
+                  onCheckedChange={(checked) =>
+                    setProductTypes((prev) => ({ ...prev, keycapsOther: !!checked }))
+                  }
+                >
+                  Other
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -210,7 +245,7 @@ export default function FilterPanel({
               setBudget((prev) => ({ ...prev, under50: !!checked }))
             }
           >
-            $ (Under $50)
+            $ - Cheap
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={budget.between50and150}
@@ -218,7 +253,7 @@ export default function FilterPanel({
               setBudget((prev) => ({ ...prev, between50and150: !!checked }))
             }
           >
-            $$ ($50 - $150)
+            $$ - Mid-tier
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={budget.over150}
@@ -226,7 +261,7 @@ export default function FilterPanel({
               setBudget((prev) => ({ ...prev, over150: !!checked }))
             }
           >
-            $$$ (Over $150)
+            $$$ - Enthusiast
           </DropdownMenuCheckboxItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -311,19 +346,42 @@ export default function FilterPanel({
                         <Label htmlFor="switchesTactile">Tactile</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="switchesClicky" checked={tempProductTypes.switchesClicky} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, switchesClicky: !!checked }))} />
-                        <Label htmlFor="switchesClicky">Clicky</Label>
+                        <Checkbox id="switchesSilentLinear" checked={tempProductTypes.switchesSilentLinear} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, switchesClicky: !!checked }))} />
+                        <Label htmlFor="switchesSilentLinear">Silent Linear</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="switchesMagnetic" checked={tempProductTypes.switchesMagnetic} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, switchesClicky: !!checked }))} />
+                        <Label htmlFor="switchesMagnetic">Magnetic</Label>
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
-                  <div className="flex items-center space-x-2 pl-8">
-                    <Checkbox id="deskpads" checked={tempProductTypes.deskpads} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, deskpads: !!checked }))} />
-                    <Label htmlFor="deskpads">Deskpads</Label>
-                  </div>
-                  <div className="flex items-center space-x-2 pl-8">
-                    <Checkbox id="keycaps" checked={tempProductTypes.keycaps} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycaps: !!checked }))} />
-                    <Label htmlFor="keycaps">Keycaps</Label>
-                  </div>
+                  
+                  <Collapsible open={isKeycapsOpen} onOpenChange={setIsKeycapsOpen} className="pl-4">
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="w-full flex justify-between items-center">
+                        <span>Keycaps</span>
+                        {isKeycapsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pl-6 pt-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="keycapsCherry" checked={tempProductTypes.keycapsCherry} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsCherry: !!checked }))} />
+                        <Label htmlFor="keycapsCherry">Cherry</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="keycapsXDA" checked={tempProductTypes.keycapsXDA} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsXDA: !!checked }))} />
+                        <Label htmlFor="keycapsXDA">XDA</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="keycapsOEM" checked={tempProductTypes.keycapsOEM} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsOEM: !!checked }))} />
+                        <Label htmlFor="keycapsOEM">OEM</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="keycapsOther" checked={tempProductTypes.keycapsOther} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsOther: !!checked }))} />
+                        <Label htmlFor="keycapsOther">Other</Label>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </CollapsibleContent>
               </Collapsible>
               <Collapsible open={isBudgetOpen} onOpenChange={setIsBudgetOpen}>
@@ -339,15 +397,15 @@ export default function FilterPanel({
                 <CollapsibleContent className="pl-6 pt-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="under50" checked={tempBudget.under50} onCheckedChange={(checked) => setTempBudget((prev) => ({ ...prev, under50: !!checked }))} />
-                    <Label htmlFor="under50">$ (Under $50)</Label>
+                    <Label htmlFor="under50">$</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="between50and150" checked={tempBudget.between50and150} onCheckedChange={(checked) => setTempBudget((prev) => ({ ...prev, between50and150: !!checked }))} />
-                    <Label htmlFor="between50and150">$$ ($50 - $150)</Label>
+                    <Label htmlFor="between50and150">$$</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="over150" checked={tempBudget.over150} onCheckedChange={(checked) => setTempBudget((prev) => ({ ...prev, over150: !!checked }))} />
-                    <Label htmlFor="over150">$$$ (Over $150)</Label>
+                    <Label htmlFor="over150">$$$</Label>
                   </div>
                 </CollapsibleContent>
               </Collapsible>

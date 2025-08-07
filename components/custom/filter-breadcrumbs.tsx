@@ -11,12 +11,16 @@ const DESCRIPTIONS: Record<string, string> = {
   keyboardsTKL: "Keyboard: TKL",
   switchesLinear: "Switch: Linear",
   switchesTactile: "Switch: Tactile",
-  switchesClicky: "Switch: Clicky",
+  switchesSilentLinear: "Switch: Silent Linear",
+  switchesMagnetic: "Switch: Magnetic",
   deskpads: "Deskpads",
-  keycaps: "Keycaps",
-  under50: "Budget: Under $50",
-  between50and150: "Budget: $50 - $150",
-  over150: "Budget: Over $150",
+  keycapsCherry: "Keycap: Cherry",
+  keycapsXDA: "Keycap: XDA",
+  keycapsOEM: "Keycap: OEM",
+  keycapsOther: "Keycap: Other",
+  under50: "Budget: $",
+  between50and150: "Budget: $$",
+  over150: "Budget: $$$",
 };
 
 interface FilterBreadcrumbsProps {

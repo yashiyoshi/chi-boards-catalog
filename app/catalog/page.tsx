@@ -14,9 +14,13 @@ export default function Catalog() {
     keyboardsTKL: false,
     switchesLinear: false,
     switchesTactile: false,
-    switchesClicky: false,
+    switchesSilentLinear: false,
+    switchesMagnetic: false,
     deskpads: false,
-    keycaps: false,
+    keycapsCherry: false,
+    keycapsXDA: false,
+    keycapsOEM: false,
+    keycapsOther: false,
   });
 
   const [budget, setBudget] = React.useState<Budget>({

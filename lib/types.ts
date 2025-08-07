@@ -4,9 +4,12 @@ export interface ProductTypes {
   keyboardsTKL: boolean;
   switchesLinear: boolean;
   switchesTactile: boolean;
-  switchesClicky: boolean;
-  deskpads: boolean;
-  keycaps: boolean;
+  switchesSilentLinear: boolean;
+  switchesMagnetic: boolean;
+  keycapsCherry: boolean;
+  keycapsXDA: boolean;
+  keycapsOEM: boolean;
+  keycapsOther: boolean;
 }
 
 export interface Budget {
