@@ -35,65 +35,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ProductTypes, Budget } from "@/lib/types";
 
-interface FilterPanelProps {
-  productTypes: ProductTypes;
-  budget: Budget;
-  setProductTypes: React.Dispatch<React.SetStateAction<ProductTypes>>;
-  setBudget: React.Dispatch<React.SetStateAction<Budget>>;
-}
-
-export default function FilterPanel({
-  productTypes,
-  budget,
-  setProductTypes,
-  setBudget,
-}: FilterPanelProps) {
-  const [tempProductTypes, setTempProductTypes] =
-    React.useState<ProductTypes>(productTypes);
-  const [tempBudget, setTempBudget] = React.useState<Budget>(budget);
+export default function FilterPanel() {
   const [isProductTypeOpen, setIsProductTypeOpen] = React.useState(false);
   const [isKeyboardsOpen, setIsKeyboardsOpen] = React.useState(false);
   const [isSwitchesOpen, setIsSwitchesOpen] = React.useState(false);
   const [isKeycapsOpen, setIsKeycapsOpen] = React.useState(false);
   const [isBudgetOpen, setIsBudgetOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    setTempProductTypes(productTypes);
-  }, [productTypes]);
-
-  React.useEffect(() => {
-    setTempBudget(budget);
-  }, [budget]);
-
-  const areFiltersActive =
-    Object.values(productTypes).some((v) => v) ||
-    Object.values(budget).some((v) => v);
-
-  const handleClearFilters = () => {
-    setProductTypes({
-      keyboards65: false,
-      keyboards75: false,
-      keyboardsTKL: false,
-      switchesLinear: false,
-      switchesTactile: false,
-      switchesSilentLinear: false,
-      switchesMagnetic: false,
-      keycapsCherry: false,
-      keycapsXDA: false,
-      keycapsOEM: false,
-      keycapsOther: false,
-    });
-    setBudget({
-      under50: false,
-      between50and150: false,
-      over150: false,
-    });
-  };
-
-  const handleApplyFilters = () => {
-    setProductTypes(tempProductTypes);
-    setBudget(tempBudget);
-  };
 
   const productTypeFiltersDesktop = (
     <DropdownMenu>
@@ -115,26 +62,14 @@ export default function FilterPanel({
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.keyboards65}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, keyboards65: !!checked }))
-                  }
                 >
                   65%
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.keyboards75}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, keyboards75: !!checked }))
-                  }
                 >
                   75%
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.keyboardsTKL}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, keyboardsTKL: !!checked }))
-                  }
                 >
                   TKL
                 </DropdownMenuCheckboxItem>
@@ -146,34 +81,18 @@ export default function FilterPanel({
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.switchesLinear}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, switchesLinear: !!checked }))
-                  }
                 >
                   Linear
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.switchesTactile}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, switchesTactile: !!checked }))
-                  }
                 >
                   Tactile
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.switchesSilentLinear}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, switchesSilentLinear: !!checked }))
-                  }
                 >
                   Silent Linear
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.switchesMagnetic}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, switchesMagnetic: !!checked }))
-                  }
                 >
                   Magnetic
                 </DropdownMenuCheckboxItem>
@@ -185,34 +104,18 @@ export default function FilterPanel({
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.keycapsCherry}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, keycapsCherry: !!checked }))
-                  }
                 >
                   Cherry
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.keycapsXDA}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, keycapsXDA: !!checked }))
-                  }
                 >
                   XDA
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.keycapsOEM}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, keycapsOEM: !!checked }))
-                  }
                 >
                   OEM
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={productTypes.keycapsOther}
-                  onCheckedChange={(checked) =>
-                    setProductTypes((prev) => ({ ...prev, keycapsOther: !!checked }))
-                  }
                 >
                   Other
                 </DropdownMenuCheckboxItem>
@@ -240,28 +143,16 @@ export default function FilterPanel({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuCheckboxItem
-            checked={budget.under50}
-            onCheckedChange={(checked) =>
-              setBudget((prev) => ({ ...prev, under50: !!checked }))
-            }
           >
             $ - Cheap
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
-            checked={budget.between50and150}
-            onCheckedChange={(checked) =>
-              setBudget((prev) => ({ ...prev, between50and150: !!checked }))
-            }
           >
-            $$ - Mid-tier
+            $ - Mid-tier
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
-            checked={budget.over150}
-            onCheckedChange={(checked) =>
-              setBudget((prev) => ({ ...prev, over150: !!checked }))
-            }
           >
-            $$$ - Enthusiast
+            $$ - Enthusiast
           </DropdownMenuCheckboxItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -316,15 +207,15 @@ export default function FilterPanel({
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pl-6 pt-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="keyboards65" checked={tempProductTypes.keyboards65} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keyboards65: !!checked }))} />
+                        <Checkbox id="keyboards65" />
                         <Label htmlFor="keyboards65">65%</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="keyboards75" checked={tempProductTypes.keyboards75} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keyboards75: !!checked }))} />
+                        <Checkbox id="keyboards75" />
                         <Label htmlFor="keyboards75">75%</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="keyboardsTKL" checked={tempProductTypes.keyboardsTKL} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keyboardsTKL: !!checked }))} />
+                        <Checkbox id="keyboardsTKL" />
                         <Label htmlFor="keyboardsTKL">TKL</Label>
                       </div>
                     </CollapsibleContent>
@@ -338,19 +229,19 @@ export default function FilterPanel({
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pl-6 pt-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="switchesLinear" checked={tempProductTypes.switchesLinear} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, switchesLinear: !!checked }))} />
+                        <Checkbox id="switchesLinear" />
                         <Label htmlFor="switchesLinear">Linear</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="switchesTactile" checked={tempProductTypes.switchesTactile} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, switchesTactile: !!checked }))} />
+                        <Checkbox id="switchesTactile" />
                         <Label htmlFor="switchesTactile">Tactile</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="switchesSilentLinear" checked={tempProductTypes.switchesSilentLinear} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, switchesClicky: !!checked }))} />
+                        <Checkbox id="switchesSilentLinear" />
                         <Label htmlFor="switchesSilentLinear">Silent Linear</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="switchesMagnetic" checked={tempProductTypes.switchesMagnetic} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, switchesClicky: !!checked }))} />
+                        <Checkbox id="switchesMagnetic" />
                         <Label htmlFor="switchesMagnetic">Magnetic</Label>
                       </div>
                     </CollapsibleContent>
@@ -365,19 +256,19 @@ export default function FilterPanel({
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pl-6 pt-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="keycapsCherry" checked={tempProductTypes.keycapsCherry} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsCherry: !!checked }))} />
+                        <Checkbox id="keycapsCherry" />
                         <Label htmlFor="keycapsCherry">Cherry</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="keycapsXDA" checked={tempProductTypes.keycapsXDA} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsXDA: !!checked }))} />
+                        <Checkbox id="keycapsXDA" />
                         <Label htmlFor="keycapsXDA">XDA</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="keycapsOEM" checked={tempProductTypes.keycapsOEM} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsOEM: !!checked }))} />
+                        <Checkbox id="keycapsOEM" />
                         <Label htmlFor="keycapsOEM">OEM</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="keycapsOther" checked={tempProductTypes.keycapsOther} onCheckedChange={(checked) => setTempProductTypes((prev) => ({ ...prev, keycapsOther: !!checked }))} />
+                        <Checkbox id="keycapsOther" />
                         <Label htmlFor="keycapsOther">Other</Label>
                       </div>
                     </CollapsibleContent>
@@ -396,23 +287,23 @@ export default function FilterPanel({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pl-6 pt-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-4">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="under50" checked={tempBudget.under50} onCheckedChange={(checked) => setTempBudget((prev) => ({ ...prev, under50: !!checked }))} />
+                    <Checkbox id="under50" />
                     <Label htmlFor="under50">$</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="between50and150" checked={tempBudget.between50and150} onCheckedChange={(checked) => setTempBudget((prev) => ({ ...prev, between50and150: !!checked }))} />
-                    <Label htmlFor="between50and150">$$</Label>
+                    <Checkbox id="between50and150" />
+                    <Label htmlFor="between50and150">$</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="over150" checked={tempBudget.over150} onCheckedChange={(checked) => setTempBudget((prev) => ({ ...prev, over150: !!checked }))} />
-                    <Label htmlFor="over150">$$$</Label>
+                    <Checkbox id="over150" />
+                    <Label htmlFor="over150">$$</Label>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
             </div>
             <SheetFooter>
               <SheetClose asChild>
-                <Button onClick={handleApplyFilters}>Apply Filters</Button>
+                <Button>Apply Filters</Button>
               </SheetClose>
             </SheetFooter>
           </SheetContent>
@@ -423,8 +314,6 @@ export default function FilterPanel({
         <Button
           variant="outline"
           className="w-full md:w-auto"
-          onClick={handleClearFilters}
-          disabled={!areFiltersActive}
         >
           Clear All
         </Button>

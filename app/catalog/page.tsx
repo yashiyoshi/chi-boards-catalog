@@ -1,33 +1,18 @@
-'use client';
-
 import * as React from 'react';
 import FilterPanel from '@/components/custom/filter-panel';
 import Header from '@/components/custom/header';
 import FilterBreadcrumbs from '@/components/custom/filter-breadcrumbs';
 import ProductCard from '@/components/custom/product-card';
-import { ProductTypes, Budget } from '@/lib/types';
+import { contentfulClient } from '@/lib/contentful/client';
+import { Product } from '@/lib/types';
 
-export default function Catalog() {
-  const [productTypes, setProductTypes] = React.useState<ProductTypes>({
-    keyboards65: false,
-    keyboards75: false,
-    keyboardsTKL: false,
-    switchesLinear: false,
-    switchesTactile: false,
-    switchesSilentLinear: false,
-    switchesMagnetic: false,
-    deskpads: false,
-    keycapsCherry: false,
-    keycapsXDA: false,
-    keycapsOEM: false,
-    keycapsOther: false,
-  });
+async function fetchProducts(): Promise<Product[]> {
+  const res = await contentfulClient.getEntries({ content_type: 'product' });
+  return res.items.map((item: any) => item.fields);
+}
 
-  const [budget, setBudget] = React.useState<Budget>({
-    under50: false,
-    between50and150: false,
-    over150: false,
-  });
+export default async function Catalog() {
+  const products = await fetchProducts();
 
   return (
     <div
@@ -40,37 +25,14 @@ export default function Catalog() {
     >
       <Header />
       <div className="mx-12">
-        <FilterPanel
-          productTypes={productTypes}
-          setProductTypes={setProductTypes}
-          budget={budget}
-          setBudget={setBudget}
-        />
-        <FilterBreadcrumbs
-          productTypes={productTypes}
-          setProductTypes={setProductTypes}
-          budget={budget}
-          setBudget={setBudget}
-        />
+        <FilterPanel />
+        <FilterBreadcrumbs />
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          <ProductCard 
-            imageUrl="/main-banner-black.png"
-            title="Black Keyboard"
-            budget="$$"
-            stock={80}
-            price={11}
-            slug="black-keyboard-1"
-          />
-          <ProductCard 
-            imageUrl="/main-banner-white.png"
-            title="White Keyboard"
-            budget="$$$"
-            stock={25}
-            price={15}
-            slug="white-keyboard-1"
-          />
+          {products.map((product) => (
+            <ProductCard key={product.slug} product={product} stock={0} price={0} />
+          ))}
         </div>
       </div>
     </div>

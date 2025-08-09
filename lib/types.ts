@@ -17,3 +17,14 @@ export interface Budget {
   between50and150: boolean;
   over150: boolean;
 }
+
+export interface Product {
+  productName: string;
+  slug: string;
+  mainImage: any;
+  productCategory: string;
+  switchType: string;
+  keyboardProfile: string;
+  budget: string;
+  description: any;
+}
