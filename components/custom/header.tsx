@@ -9,7 +9,7 @@ export default function Header() {
     <div className="flex min-w-screen items-center justify-between p-8">
       <Image src={Banner} alt="main-banner" height={50} width={100} />
       <div className=" flex flex-row gap-2 w-1/2">
-        <Input type="search" placeholder="Search for..." />
+        <Input className="bg-[#fefefefe]" type="search" placeholder="Search for..." />
         <Button type="submit" variant="outline">
           <Search />
         </Button>

@@ -14,10 +14,10 @@ interface ProductCardProps {
 export default function ProductCard({ product, stock, price, onProductClick }: ProductCardProps) {
   return (
     <div
-      className="rounded-sm overflow-hidden w-full max-w-sm mx-auto cursor-pointer"
+      className="rounded-md overflow-hidden w-full max-w-sm mx-auto cursor-pointer bg-[#F8F8F8] border-2 p-4"
       onClick={() => onProductClick(product)}
     >
-      <div className="bg-white relative w-full aspect-square">
+      <div className="relative w-full aspect-square">
         <Image
           src={`https:${product.mainImage.fields.file.url}`}
           alt={product.productName}
