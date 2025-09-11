@@ -27,4 +27,11 @@ export interface Product {
   keyboardProfile: string;
   budget: string;
   description: any;
+  // Google Sheets integration fields
+  stock?: string | number;
+  price?: number;
+  sheetsCategory?: string;
+  status?: string;
+  isInStock?: boolean;
+  hasSheetData?: boolean;
 }

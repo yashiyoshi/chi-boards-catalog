@@ -6,16 +6,10 @@ import FilterPanel from "@/components/custom/filter-panel";
 import Header from "@/components/custom/header";
 import FilterBreadcrumbs from "@/components/custom/filter-breadcrumbs";
 import ProductCard from "@/components/custom/product-card";
-import { contentfulClient } from "@/lib/contentful/client";
 import { Product } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Copy, Icon } from "lucide-react";
-
-async function fetchProducts(): Promise<Product[]> {
-  const res = await contentfulClient.getEntries({ content_type: "product" });
-  return res.items.map((item: any) => item.fields);
-}
 
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,9 +19,29 @@ export default function Catalog() {
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isPromptGenerated, setIsPromptGenerated] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts().then(setProducts);
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/products');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        
+        const fetchedProducts = await response.json();
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   const handleProductClick = (product: Product) => {
@@ -74,15 +88,26 @@ export default function Catalog() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <ProductCard
-              key={product.slug}
-              product={product}
-              stock={0}
-              price={0}
-              onProductClick={handleProductClick}
-            />
-          ))}
+          {isLoading ? (
+            // Loading skeleton
+            Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="rounded-md overflow-hidden w-full max-w-sm mx-auto border-2 p-4 bg-gray-100 animate-pulse">
+                <div className="w-full aspect-square bg-gray-200 rounded"></div>
+                <div className="py-2 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            ))
+          ) : (
+            products.map((product) => (
+              <ProductCard
+                key={product.slug}
+                product={product}
+                onProductClick={handleProductClick}
+              />
+            ))
+          )}
         </div>
       </div>
 
@@ -90,13 +115,31 @@ export default function Catalog() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-[#fcfcfcfc] p-8 rounded-md shadow-lg max-w-md w-full relative">
             <div>
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-xl font-bold mb-3 pr-8">
                 {selectedProduct.productName}
               </h2>
-              <p className="text-gray-700">Budget: {selectedProduct.budget}</p>
-              <p className="text-gray-700 mb-4">
-                Description: {selectedProduct.description}
-              </p>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p><span className="font-medium">Budget:</span> {selectedProduct.budget}</p>
+                <p><span className="font-medium">Description:</span> {selectedProduct.description}</p>
+                {selectedProduct.hasSheetData && (
+                  <>
+                    <p><span className="font-medium">Current Stock:</span> 
+                      <span className={selectedProduct.isInStock ? 'text-green-600' : 'text-red-600'}>
+                        {typeof selectedProduct.stock === 'string' ? selectedProduct.stock : `${selectedProduct.stock} pcs`}
+                      </span>
+                    </p>
+                    <p><span className="font-medium">Price:</span> ₱{selectedProduct.price || 'Contact for pricing'}</p>
+                    <div className="bg-green-50 p-2 rounded text-xs">
+                      ✅ Live data from inventory system
+                    </div>
+                  </>
+                )}
+                {!selectedProduct.hasSheetData && (
+                  <div className="bg-yellow-50 p-2 rounded text-xs">
+                    ⚠️ Stock and pricing info not available - contact for details
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <p>Enter Desired Quantity:</p>
