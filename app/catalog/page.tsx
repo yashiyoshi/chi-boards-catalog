@@ -20,6 +20,8 @@ export default function Catalog() {
   const [isPromptGenerated, setIsPromptGenerated] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -55,9 +57,37 @@ export default function Catalog() {
     setIsPromptGenerated(false);
     setGeneratedPrompt("");
     setIsCopied(false);
+    setShowError(false);
+    setErrorMessage("");
+  };
+
+  const showErrorMessage = (message: string) => {
+    setErrorMessage(message);
+    setShowError(true);
+    setTimeout(() => setShowError(false), 4000);
   };
 
   const generatePrompt = () => {
+    // Ensure quantity is positive
+    if (quantity <= 0) {
+      showErrorMessage('Quantity must be greater than 0');
+      return;
+    }
+    
+    // Validate quantity against stock if available
+    if (selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number') {
+      if (quantity > selectedProduct.stock) {
+        showErrorMessage(`Quantity cannot exceed available stock (${selectedProduct.stock} pieces)`);
+        return;
+      }
+    }
+    
+    // Validate increments of 5 for switches
+    if (selectedProduct?.productCategory === 'Switches' && quantity % 5 !== 0) {
+      showErrorMessage('For switches, quantity must be in increments of 5 (e.g., 5, 10, 15, 20...)');
+      return;
+    }
+    
     const prompt = `I need ${quantity} pieces of ${selectedProduct?.productName}.`;
     setGeneratedPrompt(prompt);
     setIsPromptGenerated(true);
@@ -297,10 +327,17 @@ export default function Catalog() {
                         placeholder="Qty"
                         className="w-24 text-center text-sm"
                         value={quantity}
-                        onChange={(e) =>
-                          setQuantity(parseInt(e.target.value, 10))
-                        }
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          if (!isNaN(value) && value > 0) {
+                            setQuantity(value);
+                          } else if (e.target.value === '') {
+                            setQuantity(1);
+                          }
+                        }}
                         min="1"
+                        step={selectedProduct?.productCategory === 'Switches' ? 5 : 1}
+                        max={selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : undefined}
                       />
                       <Button
                         variant="default"
@@ -310,6 +347,21 @@ export default function Catalog() {
                         Generate Prompt
                       </Button>
                     </div>
+                    {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        Maximum available: {selectedProduct.stock} pieces
+                      </p>
+                    )}
+                    
+                    {/* Error Message - Desktop */}
+                    {showError && (
+                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-700 flex items-center gap-2">
+                          <span className="text-red-500">⚠️</span>
+                          {errorMessage}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -466,8 +518,17 @@ export default function Catalog() {
                     placeholder="Qty"
                     className="w-24 text-sm"
                     value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      if (!isNaN(value) && value > 0) {
+                        setQuantity(value);
+                      } else if (e.target.value === '') {
+                        setQuantity(1);
+                      }
+                    }}
                     min="1"
+                    step={selectedProduct?.productCategory === 'Switches' ? 5 : 1}
+                    max={selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : undefined}
                   />
                   <Button
                     variant={"default"}
@@ -477,6 +538,26 @@ export default function Catalog() {
                     Generate Prompt
                   </Button>
                 </div>
+                {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
+                  <p className="text-xs text-gray-500">
+                    Maximum available: {selectedProduct.stock} pieces
+                  </p>
+                )}
+                {selectedProduct?.productCategory === 'Switches' && (
+                  <p className="text-xs text-blue-600">
+                    For switches: Enter quantities in increments of 5 (5, 10, 15, 20...)
+                  </p>
+                )}
+                
+                {/* Error Message - Mobile */}
+                {showError && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-700 flex items-center gap-2">
+                      <span className="text-red-500">⚠️</span>
+                      {errorMessage}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6">
