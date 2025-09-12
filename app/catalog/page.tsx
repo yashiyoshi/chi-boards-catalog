@@ -58,7 +58,7 @@ export default function Catalog() {
   };
 
   const generatePrompt = () => {
-    const prompt = `I need ${quantity} units of ${selectedProduct?.productName}.`;
+    const prompt = `I need ${quantity} pieces of ${selectedProduct?.productName}.`;
     setGeneratedPrompt(prompt);
     setIsPromptGenerated(true);
     setIsCopied(false);
@@ -112,6 +112,41 @@ export default function Catalog() {
         </div>
       </div>
 
+      {/* Footer - Full Width */}
+      <footer className="mt-16 w-full relative overflow-hidden">
+        {/* Logo overlay on footer */}
+        <div className="absolute top-0 left-1/4 transform -translate-x-1/2 z-10">
+          <img
+            src="/chiboards-white.png"
+            alt="Chi Boards Logo"
+            className="w-auto"
+            style={{ height: "30vw", minHeight: "160px", maxHeight: "700px" }}
+          />
+        </div>
+
+        {/* Text area overlay on footer - positioned to the right */}
+        <div
+          className="absolute z-20"
+          style={{
+            top: "2vw",
+            right: "8vw"
+          }}
+        >
+          <p
+            className="text-[#F8F8F8] tracking-wider italic"
+            style={{ fontSize: "4vw", fontFamily: "Inter, sans-serif" }}
+          >
+            CHI BOARDS
+          </p>
+        </div>
+
+        <img
+          src="/footer.jpg"
+          alt="Chi Boards Footer"
+          className="w-full h-auto"
+        />
+      </footer>
+
       {isModalOpen && selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
           <div className="bg-[#fcfcfcfc] p-6 md:p-8 rounded-md shadow-lg w-full max-w-sm md:max-w-4xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -119,22 +154,22 @@ export default function Catalog() {
               .custom-scrollbar::-webkit-scrollbar {
                 width: 8px;
               }
-              
+
               .custom-scrollbar::-webkit-scrollbar-track {
                 background: #f1f1f1;
                 border-radius: 10px;
               }
-              
+
               .custom-scrollbar::-webkit-scrollbar-thumb {
                 background: linear-gradient(180deg, #d1d5db, #9ca3af);
                 border-radius: 10px;
                 border: 1px solid #e5e7eb;
               }
-              
+
               .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                 background: linear-gradient(180deg, #9ca3af, #6b7280);
               }
-              
+
               /* Firefox */
               .custom-scrollbar {
                 scrollbar-width: thin;
@@ -161,16 +196,29 @@ export default function Catalog() {
                     <h2 className="text-3xl font-bold text-gray-900">
                       {selectedProduct.productName}
                     </h2>
-                    {selectedProduct.productCategory === 'Switches' && selectedProduct.switchType && (
-                      <p className="text-lg text-gray-500 font-medium mt-1">{selectedProduct.switchType}</p>
-                    )}
+                    {selectedProduct.productCategory === "Switches" &&
+                      selectedProduct.switchType && (
+                        <p className="text-lg text-gray-500 font-medium mt-1">
+                          {selectedProduct.switchType}
+                        </p>
+                      )}
                   </div>
                   <button
                     onClick={closeModal}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -181,27 +229,39 @@ export default function Catalog() {
                       {selectedProduct.description}
                     </p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="font-medium text-gray-700 text-sm">Budget:</span>
-                      <p className="font-semibold text-gray-900 text-base">{selectedProduct.budget}</p>
+                      <span className="font-medium text-gray-700 text-sm">
+                        Budget:
+                      </span>
+                      <p className="font-semibold text-gray-900 text-base">
+                        {selectedProduct.budget}
+                      </p>
                     </div>
 
                     {selectedProduct.hasSheetData ? (
                       <>
                         <div>
-                          <span className="font-medium text-gray-700 text-sm">Current Stock:</span>
-                          <p className={`font-semibold text-base ${
-                            selectedProduct.isInStock ? "text-green-600" : "text-red-600"
-                          }`}>
+                          <span className="font-medium text-gray-700 text-sm">
+                            Current Stock:
+                          </span>
+                          <p
+                            className={`font-semibold text-base ${
+                              selectedProduct.isInStock
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
                             {typeof selectedProduct.stock === "string"
                               ? selectedProduct.stock
                               : `${selectedProduct.stock} pcs`}
                           </p>
                         </div>
                         <div className="col-span-2">
-                          <span className="font-medium text-gray-700 text-sm">Price:</span>
+                          <span className="font-medium text-gray-700 text-sm">
+                            Price:
+                          </span>
                           <p className="font-semibold text-gray-900 text-base">
                             ₱{selectedProduct.price || "Contact for pricing"}/pc
                           </p>
@@ -212,8 +272,12 @@ export default function Catalog() {
                         <div className="flex items-center gap-2 text-yellow-700">
                           <span className="text-lg">⚠️</span>
                           <div>
-                            <p className="font-medium">Stock and pricing info not available</p>
-                            <p className="text-sm">Please contact us for current details</p>
+                            <p className="font-medium">
+                              Stock and pricing info not available
+                            </p>
+                            <p className="text-sm">
+                              Please contact us for current details
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -224,14 +288,18 @@ export default function Catalog() {
                 {/* Form Section - Desktop */}
                 <div className="mt-8 space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Enter Desired Quantity:</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Enter Desired Quantity:
+                    </label>
                     <div className="flex items-center gap-3">
                       <Input
                         type="number"
                         placeholder="Qty"
                         className="w-24 text-center text-sm"
                         value={quantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+                        onChange={(e) =>
+                          setQuantity(parseInt(e.target.value, 10))
+                        }
                         min="1"
                       />
                       <Button
@@ -245,15 +313,19 @@ export default function Catalog() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Generated Prompt:</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Generated Prompt:
+                    </label>
                     <div className="relative">
                       <Input
                         value={isPromptGenerated ? generatedPrompt : ""}
-                        placeholder={isPromptGenerated ? "" : "Generate a prompt first..."}
+                        placeholder={
+                          isPromptGenerated ? "" : "Generate a prompt first..."
+                        }
                         disabled={!isPromptGenerated}
                         className={`w-full pr-16 text-sm ${
-                          isPromptGenerated 
-                            ? "bg-gray-50 text-gray-900" 
+                          isPromptGenerated
+                            ? "bg-gray-50 text-gray-400"
                             : "bg-gray-100 text-gray-400"
                         }`}
                         readOnly
@@ -261,7 +333,9 @@ export default function Catalog() {
                       {isPromptGenerated && (
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
                           {isCopied ? (
-                            <span className="text-green-600 text-sm font-medium">Copied!</span>
+                            <span className="text-green-600 text-sm font-medium">
+                              Copied!
+                            </span>
                           ) : (
                             <button
                               onClick={copyToClipboard}
@@ -276,7 +350,8 @@ export default function Catalog() {
                     </div>
                     {isCopied && (
                       <p className="text-sm text-green-600 mt-3 p-3 bg-green-50 rounded border border-green-200">
-                        ✓ Prompt copied successfully! Go to messenger and paste it into the chat.
+                        ✓ Prompt copied successfully! Go to messenger and paste
+                        it into the chat.
                       </p>
                     )}
                   </div>
@@ -284,7 +359,7 @@ export default function Catalog() {
                   <div className="flex flex-col gap-3 pt-4">
                     <button
                       onClick={() => {
-                        window.open('https://m.me/173538739173933', '_blank');
+                        window.open("https://m.me/173538739173933", "_blank");
                         closeModal();
                       }}
                       className="bg-black text-white px-6 py-3 rounded font-medium text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -310,16 +385,29 @@ export default function Catalog() {
                   <h2 className="text-2xl font-bold text-gray-900">
                     {selectedProduct.productName}
                   </h2>
-                  {selectedProduct.productCategory === 'Switches' && selectedProduct.switchType && (
-                    <p className="text-base text-gray-500 font-medium mt-1">{selectedProduct.switchType}</p>
-                  )}
+                  {selectedProduct.productCategory === "Switches" &&
+                    selectedProduct.switchType && (
+                      <p className="text-base text-gray-500 font-medium mt-1">
+                        {selectedProduct.switchType}
+                      </p>
+                    )}
                 </div>
                 <button
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -327,13 +415,17 @@ export default function Catalog() {
               <div className="space-y-3 text-sm text-gray-600">
                 <p className="mt-3">
                   <span className="font-medium text-sm">Budget:</span>{" "}
-                  <span className="font-semibold text-gray-900 text-sm">{selectedProduct.budget}</span>
+                  <span className="font-semibold text-gray-900 text-sm">
+                    {selectedProduct.budget}
+                  </span>
                 </p>
 
                 {selectedProduct.hasSheetData && (
                   <div className="mt-4 space-y-2">
                     <p>
-                      <span className="font-medium text-sm">Current Stock:</span>{" "}
+                      <span className="font-medium text-sm">
+                        Current Stock:
+                      </span>{" "}
                       <span
                         className={`font-semibold ml-1 text-sm ${
                           selectedProduct.isInStock
@@ -356,13 +448,18 @@ export default function Catalog() {
                 )}
                 {!selectedProduct.hasSheetData && (
                   <div className="bg-yellow-50 p-3 rounded text-sm mt-4">
-                    <span className="font-medium">⚠️ Stock and pricing info not available</span> - contact for details
+                    <span className="font-medium">
+                      ⚠️ Stock and pricing info not available
+                    </span>{" "}
+                    - contact for details
                   </div>
                 )}
               </div>
 
               <div className="flex flex-col gap-3 mt-6">
-                <label className="text-sm font-medium text-gray-700">Enter Desired Quantity:</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Enter Desired Quantity:
+                </label>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -383,19 +480,19 @@ export default function Catalog() {
               </div>
 
               <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">Generated Prompt:</label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Generated Prompt:
+                </label>
                 <div className="relative">
                   <Input
                     value={isPromptGenerated ? generatedPrompt : ""}
                     placeholder={
-                      isPromptGenerated
-                        ? ""
-                        : "Generate a prompt first..."
+                      isPromptGenerated ? "" : "Generate a prompt first..."
                     }
                     disabled={!isPromptGenerated}
                     className={`w-full pr-16 text-sm ${
-                      isPromptGenerated 
-                        ? "bg-gray-50 text-gray-400" 
+                      isPromptGenerated
+                        ? "bg-gray-50 text-gray-400"
                         : "bg-gray-100 text-gray-400"
                     }`}
                     readOnly
@@ -421,14 +518,15 @@ export default function Catalog() {
               </div>
               {isCopied && (
                 <p className="text-sm text-green-600 mt-3 p-3 bg-green-50 rounded border border-green-200">
-                  ✓ Prompt copied successfully! Go to messenger and paste it into the chat.
+                  ✓ Prompt copied successfully! Go to messenger and paste it
+                  into the chat.
                 </p>
               )}
 
               <div className="flex flex-col gap-3 mt-8">
                 <button
                   onClick={() => {
-                    window.open('https://m.me/173538739173933', '_blank');
+                    window.open("https://m.me/173538739173933", "_blank");
                     closeModal();
                   }}
                   className="bg-black text-white px-6 py-3 rounded font-medium text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
