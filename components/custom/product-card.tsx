@@ -34,10 +34,12 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
 
   return (
     <div
-      className={`rounded-md overflow-hidden w-full max-w-sm mx-auto cursor-pointer border-2 p-4 ${
-        isInStock ? 'bg-[#F8F8F8]' : 'bg-gray-100 opacity-75'
+      className={`rounded-md overflow-hidden w-full max-w-sm mx-auto border-2 p-4 ${
+        isInStock 
+          ? 'bg-[#F8F8F8] cursor-pointer hover:shadow-md transition-shadow' 
+          : 'bg-gray-100 opacity-75 cursor-not-allowed'
       }`}
-      onClick={() => onProductClick(product)}
+      onClick={isInStock ? () => onProductClick(product) : undefined}
     >
       <div className="relative w-full aspect-square">
         <Image
@@ -55,10 +57,15 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
       </div>
       <div className="py-2 flex flex-col justify-between bg-transparent">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-bold text-gray-900">{product.productName}</h3>
+          <div className="flex-1 pr-2">
+            <h3 className="text-lg font-bold text-gray-900">{product.productName}</h3>
+            {product.productCategory === 'Switches' && product.switchType && (
+              <p className="text-xs text-gray-500 font-medium">{product.switchType}</p>
+            )}
+          </div>
           <p className="text-lg font-bold text-gray-900">{product.budget}</p>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-2">
           <p className={`text-sm ${isInStock ? 'text-gray-500' : 'text-red-500'}`}>
             Stock: {stockDisplay()}
           </p>
