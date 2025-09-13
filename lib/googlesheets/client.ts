@@ -83,15 +83,21 @@ export async function getProductData() {
     }
   ];
 
-  // Fetch data from each sheet
-  for (const config of sheetConfigs) {
-    try {
-      const response = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: `${config.name}!${config.range}`,
-      });
+  try {
+    // Batch all requests into a single API call for better performance
+    const batchRanges = sheetConfigs.map(config => `${config.name}!${config.range}`);
+    
+    const response = await sheets.spreadsheets.values.batchGet({
+      spreadsheetId,
+      ranges: batchRanges,
+    });
 
-      const rows = response.data.values;
+    const valueRanges = response.data.valueRanges || [];
+    
+    // Process each sheet's data
+    sheetConfigs.forEach((config, index) => {
+      const rows = valueRanges[index]?.values;
+      
       if (rows) {
         const products = rows
           .filter(row => {
@@ -141,9 +147,10 @@ export async function getProductData() {
 
         allProducts.push(...products);
       }
-    } catch (error) {
-      console.error(`Error fetching data from ${config.name} sheet:`, error);
-    }
+    });
+  } catch (error) {
+    console.error('Error in batch fetch from Google Sheets:', error);
+    throw error; // Re-throw to handle at API level
   }
 
   return allProducts;

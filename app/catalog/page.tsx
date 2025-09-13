@@ -6,10 +6,12 @@ import FilterPanel from "@/components/custom/filter-panel";
 import Header from "@/components/custom/header";
 import FilterBreadcrumbs from "@/components/custom/filter-breadcrumbs";
 import ProductCard from "@/components/custom/product-card";
+import ProductSkeleton from "@/components/custom/product-skeleton";
 import { Product } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Copy, Icon } from "lucide-react";
+import { cachedFetch } from "@/lib/cache";
 
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -27,13 +29,19 @@ export default function Catalog() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/products");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
-        const fetchedProducts = await response.json();
+        
+        // Use cached fetch with stale-while-revalidate for better performance
+        const fetchedProducts = await cachedFetch<Product[]>(
+          "/api/products",
+          {
+            headers: {
+              'Cache-Control': 'max-age=300',
+            },
+          },
+          'products',
+          300 // 5 minutes cache
+        );
+        
         setProducts(fetchedProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -88,7 +96,17 @@ export default function Catalog() {
       return;
     }
     
-    const prompt = `I need ${quantity} pieces of ${selectedProduct?.productName}.`;
+    // Generate prompt with price information
+    let prompt = `I need ${quantity} pieces of ${selectedProduct?.productName}.`;
+    
+    // Add price information if available
+    if (selectedProduct?.hasSheetData && selectedProduct?.price && selectedProduct.price > 0) {
+      const totalPrice = quantity * selectedProduct.price;
+      prompt += ` Total price: ₱${totalPrice.toLocaleString()} (₱${selectedProduct.price} per piece).`;
+    } else {
+      prompt += ` Total price: Contact for pricing.`;
+    }
+    
     setGeneratedPrompt(prompt);
     setIsPromptGenerated(true);
     setIsCopied(false);
@@ -96,10 +114,51 @@ export default function Catalog() {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(generatedPrompt);
-      setIsCopied(true);
+      // Try modern Clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(generatedPrompt);
+        setIsCopied(true);
+      } else {
+        // Fallback for older browsers or non-HTTPS environments
+        const textArea = document.createElement('textarea');
+        textArea.value = generatedPrompt;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          setIsCopied(true);
+        } catch (err) {
+          console.error('Fallback copy failed: ', err);
+          // If both methods fail, show the text for manual copying
+          alert(`Copy this text manually:\n\n${generatedPrompt}`);
+        }
+        
+        document.body.removeChild(textArea);
+      }
     } catch (err) {
       console.error("Failed to copy text: ", err);
+      // If modern API fails, try fallback
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = generatedPrompt;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setIsCopied(true);
+      } catch (fallbackErr) {
+        console.error('All copy methods failed: ', fallbackErr);
+        alert(`Copy this text manually:\n\n${generatedPrompt}`);
+      }
     }
   };
   return (
@@ -118,27 +177,17 @@ export default function Catalog() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {isLoading
-            ? // Loading skeleton
-              Array.from({ length: 8 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="rounded-md overflow-hidden w-full max-w-sm mx-auto border-2 p-4 bg-gray-100 animate-pulse"
-                >
-                  <div className="w-full aspect-square bg-gray-200 rounded"></div>
-                  <div className="py-2 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))
-            : products.map((product) => (
-                <ProductCard
-                  key={product.slug}
-                  product={product}
-                  onProductClick={handleProductClick}
-                />
-              ))}
+          {isLoading ? (
+            <ProductSkeleton count={8} />
+          ) : (
+            products.map((product) => (
+              <ProductCard
+                key={product.slug}
+                product={product}
+                onProductClick={handleProductClick}
+              />
+            ))
+          )}
         </div>
       </div>
 
@@ -391,7 +440,7 @@ export default function Catalog() {
                           ) : (
                             <button
                               onClick={copyToClipboard}
-                              className="text-gray-500 hover:text-gray-800 transition-colors"
+                              className="text-gray-800 hover:text-gray-950 transition-colors"
                               title="Copy to clipboard"
                             >
                               <Copy className="w-4 h-4" />
@@ -543,11 +592,6 @@ export default function Catalog() {
                     Maximum available: {selectedProduct.stock} pieces
                   </p>
                 )}
-                {selectedProduct?.productCategory === 'Switches' && (
-                  <p className="text-xs text-blue-600">
-                    For switches: Enter quantities in increments of 5 (5, 10, 15, 20...)
-                  </p>
-                )}
                 
                 {/* Error Message - Mobile */}
                 {showError && (
@@ -587,7 +631,7 @@ export default function Catalog() {
                       ) : (
                         <button
                           onClick={copyToClipboard}
-                          className="text-gray-800"
+                          className="text-gray-800 hover:text-gray-950"
                           title="Copy to clipboard"
                         >
                           <Copy className="w-4 h-4" />

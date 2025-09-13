@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-
+import { useState } from 'react';
 import { Product } from '@/lib/types';
 
 interface ProductCardProps {
@@ -10,6 +10,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onProductClick }: ProductCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
   // Use Google Sheets data if available, otherwise fallback to defaults
   const stock = product.stock || 0;
   const price = product.price || 0;
@@ -42,14 +44,25 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
       onClick={isInStock ? () => onProductClick(product) : undefined}
     >
       <div className="relative w-full aspect-square">
+        {/* Loading placeholder */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
+        
         <Image
           src={`https:${product.mainImage.fields.file.url}`}
           alt={product.productName}
-          layout="fill"
-          objectFit="contain"
-          className="p-4"
+          fill
+          style={{ objectFit: 'contain' }}
+          className={`p-4 transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setImageLoaded(true)}
+          priority={false} // Lazy load images for better initial page performance
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
-        {!isInStock && (
+        
+        {!isInStock && imageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <span className="text-white font-bold">Out of Stock</span>
           </div>
@@ -61,6 +74,9 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
             <h3 className="text-lg font-bold text-gray-900">{product.productName}</h3>
             {product.productCategory === 'Switches' && product.switchType && (
               <p className="text-xs text-gray-500 font-medium">{product.switchType}</p>
+            )}
+            {product.productCategory === 'Keycaps' && product.keyboardProfile && (
+              <p className="text-xs text-gray-500 font-medium">{product.keyboardProfile}</p>
             )}
           </div>
           <p className="text-lg font-bold text-gray-900">{product.budget}</p>
