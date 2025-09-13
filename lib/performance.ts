@@ -54,7 +54,6 @@ export class PerformanceMonitor {
           const duration = resource.responseEnd - resource.requestStart;
           console.log(`  ${resource.name}: ${duration.toFixed(2)}ms`);
         });
-      }
     }
   }
 }

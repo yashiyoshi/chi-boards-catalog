@@ -393,7 +393,7 @@ export default function Catalog() {
                         onClick={generatePrompt}
                         className="flex-grow text-sm"
                       >
-                        Generate Prompt
+                        Buy Now
                       </Button>
                     </div>
                     {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
@@ -584,7 +584,7 @@ export default function Catalog() {
                     onClick={generatePrompt}
                     className="flex-grow text-sm"
                   >
-                    Generate Prompt
+                    Buy Now
                   </Button>
                 </div>
                 {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
