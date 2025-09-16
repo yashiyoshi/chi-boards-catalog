@@ -185,11 +185,10 @@ export default function Catalog() {
     
     prompt += `📦 DELIVERY:\n`;
     if (deliveryOption === 'delivery') {
-      prompt += `Delivery to: ${deliveryAddress}\n`;
-      prompt += `(Near UM Matina area only)\n`;
+      prompt += `Delivery via Maxim/Grab to: ${deliveryAddress}\n`;
       prompt += `Delivery Fee: To be calculated and confirmed\n\n`;
     } else {
-      prompt += `Pickup at store\n`;
+      prompt += `Pickup (Near UM Matina only)\n`;
       prompt += `Delivery Fee: Free (Pickup)\n\n`;
     }
     
@@ -675,7 +674,7 @@ export default function Catalog() {
                                 onChange={(e) => setDeliveryOption(e.target.value)}
                                 className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                               />
-                              <span className="text-sm text-gray-700">Pickup at store</span>
+                              <span className="text-sm text-gray-700">Pickup (Near UM Matina only)</span>
                             </label>
                             <label className="flex items-center space-x-3 cursor-pointer">
                               <input
@@ -686,18 +685,33 @@ export default function Catalog() {
                                 onChange={(e) => setDeliveryOption(e.target.value)}
                                 className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                               />
-                              <span className="text-sm text-gray-700">Delivery (Near UM Matina only)</span>
+                              <span className="text-sm text-gray-700">Delivery via Maxim/Grab (Davao City only)</span>
+                            </label>
+                            <label className="flex items-center space-x-3 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="deliveryOption"
+                                value="shipping"
+                                checked={deliveryOption === 'shipping'}
+                                onChange={(e) => setDeliveryOption(e.target.value)}
+                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-700">Domestic shipping via J&T (Within Philippines)</span>
                             </label>
                           </div>
                         </div>
                         
-                        {deliveryOption === 'delivery' && (
+                        {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Delivery Address *
+                              {deliveryOption === 'delivery' ? 'Delivery Address *' : 'Shipping Address *'}
                             </label>
                             <textarea
-                              placeholder="Enter your complete address (near UM Matina area only)"
+                              placeholder={
+                                deliveryOption === 'delivery' 
+                                  ? "Enter your complete address for Maxim/Grab delivery" 
+                                  : "Enter your complete address for J&T shipping"
+                              }
                               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               rows={3}
                               value={deliveryAddress}
@@ -706,14 +720,19 @@ export default function Catalog() {
                           </div>
                         )}
                         
-                        {deliveryOption === 'delivery' && (
+                        {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
                           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                             <div className="flex items-start gap-2">
                               <span className="text-blue-600 text-lg">ℹ️</span>
                               <div>
-                                <p className="text-sm font-medium text-blue-900">Delivery Fee Calculation</p>
+                                <p className="text-sm font-medium text-blue-900">
+                                  {deliveryOption === 'delivery' ? 'Delivery Fee Calculation' : 'Shipping Fee Calculation'}
+                                </p>
                                 <p className="text-sm text-blue-800 mt-1">
-                                  The delivery fee will be calculated based on your location and communicated to you after we receive your order details and payment screenshot.
+                                  {deliveryOption === 'delivery' 
+                                    ? 'The delivery fee via Maxim/Grab will be calculated based on your location within Davao City and communicated after we receive your order details and payment screenshot.'
+                                    : 'The shipping fee via J&T will be calculated based on your location within the Philippines and communicated after we receive your order details and payment screenshot.'
+                                  }
                                 </p>
                               </div>
                             </div>
@@ -887,7 +906,7 @@ export default function Catalog() {
                         <div>
                           <p className="text-sm font-medium text-gray-700">Delivery:</p>
                           <p className="text-sm text-gray-900">
-                            {deliveryOption === 'delivery' ? `Delivery to: ${deliveryAddress}` : 'Pickup at store'}
+                            {deliveryOption === 'delivery' ? `Delivery to: ${deliveryAddress}` : 'Pickup'}
                           </p>
                         </div>
                         <div>
@@ -1279,7 +1298,7 @@ export default function Catalog() {
                             onChange={(e) => setDeliveryOption(e.target.value)}
                             className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">Pickup at store</span>
+                          <span className="text-sm text-gray-700">Pickup (Near UM Matina only)</span>
                         </label>
                         <label className="flex items-center space-x-3 cursor-pointer">
                           <input
@@ -1290,18 +1309,33 @@ export default function Catalog() {
                             onChange={(e) => setDeliveryOption(e.target.value)}
                             className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">Delivery (Near UM Matina only)</span>
+                          <span className="text-sm text-gray-700">Delivery via Maxim/Grab (Davao City only)</span>
+                        </label>
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="deliveryOption"
+                            value="shipping"
+                            checked={deliveryOption === 'shipping'}
+                            onChange={(e) => setDeliveryOption(e.target.value)}
+                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">Domestic shipping via J&T (Within Philippines)</span>
                         </label>
                       </div>
                     </div>
                     
-                    {deliveryOption === 'delivery' && (
+                    {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Delivery Address *
+                          {deliveryOption === 'delivery' ? 'Delivery Address *' : 'Shipping Address *'}
                         </label>
                         <textarea
-                          placeholder="Enter your complete address (near UM Matina area only)"
+                          placeholder={
+                            deliveryOption === 'delivery' 
+                              ? "Enter your complete address for Maxim/Grab delivery" 
+                              : "Enter your complete address for J&T shipping"
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           rows={3}
                           value={deliveryAddress}
@@ -1313,11 +1347,25 @@ export default function Catalog() {
                     {deliveryOption === 'delivery' && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <div className="flex items-start gap-2">
-                          <span className="text-blue-600">ℹ️</span>
+                          <span className="text-blue-600">🚗</span>
                           <div>
-                            <p className="text-xs font-medium text-blue-900">Delivery Fee Calculation</p>
+                            <p className="text-xs font-medium text-blue-900">Delivery via Maxim/Grab</p>
                             <p className="text-xs text-blue-800 mt-1">
-                              The delivery fee will be calculated based on your location and communicated after we receive your order and payment screenshot.
+                              Available for Davao City only. Delivery fee will be calculated and communicated after we receive your order and payment screenshot.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {deliveryOption === 'shipping' && (
+                      <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                        <div className="flex items-start gap-2">
+                          <span className="text-green-600">📦</span>
+                          <div>
+                            <p className="text-xs font-medium text-green-900">Shipping via J&T</p>
+                            <p className="text-xs text-green-800 mt-1">
+                              Available nationwide in the Philippines. Shipping fee will be calculated and communicated after we receive your order and payment screenshot.
                             </p>
                           </div>
                         </div>
@@ -1491,7 +1539,7 @@ export default function Catalog() {
                     <div>
                       <p className="text-xs font-medium text-gray-700">Delivery:</p>
                       <p className="text-sm text-gray-900">
-                        {deliveryOption === 'delivery' ? `Delivery to: ${deliveryAddress}` : 'Pickup at store'}
+                        {deliveryOption === 'delivery' ? `Delivery to: ${deliveryAddress}` : 'Pickup'}
                       </p>
                     </div>
                     <div>
