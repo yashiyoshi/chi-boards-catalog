@@ -4,6 +4,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import FilterPanel from "@/components/custom/filter-panel";
 import Header from "@/components/custom/header";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import FilterBreadcrumbs from "@/components/custom/filter-breadcrumbs";
 import ProductCard from "@/components/custom/product-card";
 import ProductSkeleton from "@/components/custom/product-skeleton";
@@ -45,11 +46,11 @@ export default function Catalog() {
           "/api/products",
           {
             headers: {
-              'Cache-Control': 'max-age=300',
+              'Cache-Control': 'max-age=600',
             },
           },
           'products',
-          300 // 5 minutes cache
+          600 // 5 minutes cache
         );
         
         setProducts(fetchedProducts);
@@ -664,41 +665,26 @@ export default function Catalog() {
                           <label className="block text-sm font-medium text-gray-700 mb-3">
                             How would you like to receive your order? *
                           </label>
-                          <div className="space-y-3">
-                            <label className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="deliveryOption"
-                                value="pickup"
-                                checked={deliveryOption === 'pickup'}
-                                onChange={(e) => setDeliveryOption(e.target.value)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-gray-700">Pickup (Near UM Matina only)</span>
-                            </label>
-                            <label className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="deliveryOption"
-                                value="delivery"
-                                checked={deliveryOption === 'delivery'}
-                                onChange={(e) => setDeliveryOption(e.target.value)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-gray-700">Delivery via Maxim/Grab (Davao City only)</span>
-                            </label>
-                            <label className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="deliveryOption"
-                                value="shipping"
-                                checked={deliveryOption === 'shipping'}
-                                onChange={(e) => setDeliveryOption(e.target.value)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-gray-700">Domestic shipping via J&T (Within Philippines)</span>
-                            </label>
-                          </div>
+                          <RadioGroup value={deliveryOption} onValueChange={setDeliveryOption}>
+                            <div className="flex items-center space-x-3">
+                              <RadioGroupItem value="pickup" id="pickup-desktop" />
+                              <label htmlFor="pickup-desktop" className="text-sm text-gray-700 cursor-pointer">
+                                Pickup (Near UM Matina only)
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <RadioGroupItem value="delivery" id="delivery-desktop" />
+                              <label htmlFor="delivery-desktop" className="text-sm text-gray-700 cursor-pointer">
+                                Delivery via Maxim/Grab (Davao City only)
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <RadioGroupItem value="shipping" id="shipping-desktop" />
+                              <label htmlFor="shipping-desktop" className="text-sm text-gray-700 cursor-pointer">
+                                Domestic shipping via J&T (Within Philippines)
+                              </label>
+                            </div>
+                          </RadioGroup>
                         </div>
                         
                         {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
@@ -807,30 +793,20 @@ export default function Catalog() {
                           <label className="block text-sm font-medium text-gray-700 mb-3">
                             Select Payment Method *
                           </label>
-                          <div className="space-y-3">
-                            <label className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="gcash"
-                                checked={paymentMethod === 'gcash'}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-gray-700">GCash</span>
-                            </label>
-                            <label className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="bpi"
-                                checked={paymentMethod === 'bpi'}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-gray-700">BPI</span>
-                            </label>
-                          </div>
+                          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                            <div className="flex items-center space-x-3">
+                              <RadioGroupItem value="gcash" id="gcash-desktop" />
+                              <label htmlFor="gcash-desktop" className="text-sm text-gray-700 cursor-pointer">
+                                GCash
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <RadioGroupItem value="bpi" id="bpi-desktop" />
+                              <label htmlFor="bpi-desktop" className="text-sm text-gray-700 cursor-pointer">
+                                BPI
+                              </label>
+                            </div>
+                          </RadioGroup>
                         </div>
                         
                         {paymentMethod && (
@@ -1288,41 +1264,26 @@ export default function Catalog() {
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         How would you like to receive your order? *
                       </label>
-                      <div className="space-y-3">
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="deliveryOption"
-                            value="pickup"
-                            checked={deliveryOption === 'pickup'}
-                            onChange={(e) => setDeliveryOption(e.target.value)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">Pickup (Near UM Matina only)</span>
-                        </label>
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="deliveryOption"
-                            value="delivery"
-                            checked={deliveryOption === 'delivery'}
-                            onChange={(e) => setDeliveryOption(e.target.value)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">Delivery via Maxim/Grab (Davao City only)</span>
-                        </label>
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="deliveryOption"
-                            value="shipping"
-                            checked={deliveryOption === 'shipping'}
-                            onChange={(e) => setDeliveryOption(e.target.value)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">Domestic shipping via J&T (Within Philippines)</span>
-                        </label>
-                      </div>
+                      <RadioGroup value={deliveryOption} onValueChange={setDeliveryOption}>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="pickup" id="pickup-mobile" />
+                          <label htmlFor="pickup-mobile" className="text-sm text-gray-700 cursor-pointer">
+                            Pickup (Near UM Matina only)
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="delivery" id="delivery-mobile" />
+                          <label htmlFor="delivery-mobile" className="text-sm text-gray-700 cursor-pointer">
+                            Delivery via Maxim/Grab (Davao City only)
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="shipping" id="shipping-mobile" />
+                          <label htmlFor="shipping-mobile" className="text-sm text-gray-700 cursor-pointer">
+                            Domestic shipping via J&T (Within Philippines)
+                          </label>
+                        </div>
+                      </RadioGroup>
                     </div>
                     
                     {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
@@ -1440,30 +1401,20 @@ export default function Catalog() {
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         Select Payment Method *
                       </label>
-                      <div className="space-y-3">
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="gcash"
-                            checked={paymentMethod === 'gcash'}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">GCash</span>
-                        </label>
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="bpi"
-                            checked={paymentMethod === 'bpi'}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">BPI</span>
-                        </label>
-                      </div>
+                      <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="gcash" id="gcash-mobile" />
+                          <label htmlFor="gcash-mobile" className="text-sm text-gray-700 cursor-pointer">
+                            GCash
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="bpi" id="bpi-mobile" />
+                          <label htmlFor="bpi-mobile" className="text-sm text-gray-700 cursor-pointer">
+                            BPI
+                          </label>
+                        </div>
+                      </RadioGroup>
                     </div>
                     
                     {paymentMethod && (
