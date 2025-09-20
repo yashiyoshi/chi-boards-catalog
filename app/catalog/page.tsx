@@ -37,32 +37,85 @@ export default function Catalog() {
   const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProductsOptimized = async () => {
       try {
         setIsLoading(true);
         
-        // Use cached fetch with stale-while-revalidate for better performance
-        const fetchedProducts = await cachedFetch<Product[]>(
-          "/api/products",
+        // Phase 1: Load basic product info first (fast)
+        console.log('Loading basic product info...');
+        const basicProducts = await cachedFetch<Product[]>(
+          "/api/products/basic",
           {
             headers: {
               'Cache-Control': 'max-age=600',
             },
           },
-          'products',
-          600 // 5 minutes cache
+          'basic-products',
+          600
         );
         
-        setProducts(fetchedProducts);
+        // Set basic products immediately for fast initial render
+        setProducts(basicProducts);
+        setIsLoading(false); // Products cards can now render with placeholders
+        
+        // Phase 2: Load stock and pricing data in background
+        console.log('Loading stock and pricing data...');
+        try {
+          const stockData = await cachedFetch<Record<string, any>>(
+            "/api/products/stock",
+            {
+              headers: {
+                'Cache-Control': 'max-age=120',
+              },
+            },
+            'stock-data',
+            120
+          );
+          
+          // Update products with stock and pricing data
+          setProducts(prevProducts => 
+            prevProducts.map(product => {
+              const normalizedName = product.productName.toLowerCase().trim();
+              const stockInfo = stockData[normalizedName];
+              
+              if (stockInfo) {
+                return {
+                  ...product,
+                  stock: stockInfo.stock,
+                  price: stockInfo.price,
+                  isInStock: stockInfo.isInStock,
+                  hasSheetData: true,
+                  isLoadingDetails: false
+                };
+              }
+              
+              return {
+                ...product,
+                hasSheetData: false,
+                isLoadingDetails: false
+              };
+            })
+          );
+          
+        } catch (stockError) {
+          console.error('Error loading stock data:', stockError);
+          // Remove loading state even if stock data fails
+          setProducts(prevProducts => 
+            prevProducts.map(product => ({
+              ...product,
+              isLoadingDetails: false
+            }))
+          );
+        }
+        
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching basic products:", error);
         setProducts([]);
-      } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchProductsOptimized();
   }, []);
 
   const handleProductClick = (product: Product) => {
