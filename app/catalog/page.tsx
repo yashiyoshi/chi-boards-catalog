@@ -19,12 +19,12 @@ const sortProductsByPriority = (products: Product[]): Product[] => {
     // Calculate priority scores (higher = shown first)
     const scoreA = (a.isBestSeller ? 2 : 0) + (a.isOnSale ? 1 : 0);
     const scoreB = (b.isBestSeller ? 2 : 0) + (b.isOnSale ? 1 : 0);
-    
+
     // Sort by priority score (descending), then by name (ascending) for consistency
     if (scoreA !== scoreB) {
       return scoreB - scoreA;
     }
-    
+
     // If same priority, sort alphabetically by product name
     return a.productName.localeCompare(b.productName);
   });
@@ -50,7 +50,7 @@ export default function Catalog() {
   const [currentStep, setCurrentStep] = useState(1);
   const [contactDetails, setContactDetails] = useState({
     fullName: "",
-    contactNumber: ""
+    contactNumber: "",
   });
   const [deliveryOption, setDeliveryOption] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -61,46 +61,46 @@ export default function Catalog() {
     const fetchProductsOptimized = async () => {
       try {
         setIsLoading(true);
-        
+
         // Phase 1: Load basic product info first (fast)
-        console.log('Loading basic product info...');
+        console.log("Loading basic product info...");
         const basicProducts = await cachedFetch<Product[]>(
           "/api/products/basic",
           {
             headers: {
-              'Cache-Control': 'max-age=600',
+              "Cache-Control": "max-age=600",
             },
           },
-          'basic-products',
+          "basic-products",
           600
         );
-        
+
         // Set basic products immediately for fast initial render with priority sorting
         const sortedBasicProducts = sortProductsByPriority(basicProducts);
         setProducts(sortedBasicProducts);
         setIsLoading(false); // Products cards can now render with placeholders
-        
+
         // Phase 2: Load stock and pricing data in background
-        console.log('Loading stock and pricing data...');
+        console.log("Loading stock and pricing data...");
         try {
           const stockData = await cachedFetch<Record<string, any>>(
             "/api/products/stock",
             {
               headers: {
-                'Cache-Control': 'max-age=120',
+                "Cache-Control": "max-age=120",
               },
             },
-            'stock-data',
+            "stock-data",
             120
           );
-          
+
           // Update products with stock and pricing data
-          setProducts(prevProducts => 
+          setProducts((prevProducts) =>
             sortProductsByPriority(
-              prevProducts.map(product => {
+              prevProducts.map((product) => {
                 const normalizedName = product.productName.toLowerCase().trim();
                 const stockInfo = stockData[normalizedName];
-                
+
                 if (stockInfo) {
                   return {
                     ...product,
@@ -108,30 +108,28 @@ export default function Catalog() {
                     price: stockInfo.price,
                     isInStock: stockInfo.isInStock,
                     hasSheetData: true,
-                    isLoadingDetails: false
+                    isLoadingDetails: false,
                   };
                 }
-                
+
                 return {
                   ...product,
                   hasSheetData: false,
-                  isLoadingDetails: false
+                  isLoadingDetails: false,
                 };
               })
             )
           );
-          
         } catch (stockError) {
-          console.error('Error loading stock data:', stockError);
+          console.error("Error loading stock data:", stockError);
           // Remove loading state even if stock data fails
-          setProducts(prevProducts => 
-            prevProducts.map(product => ({
+          setProducts((prevProducts) =>
+            prevProducts.map((product) => ({
               ...product,
-              isLoadingDetails: false
+              isLoadingDetails: false,
             }))
           );
         }
-        
       } catch (error) {
         console.error("Error fetching basic products:", error);
         setProducts([]);
@@ -146,7 +144,7 @@ export default function Catalog() {
     setSelectedProduct(product);
     setIsModalOpen(true);
     // Set initial quantity based on product category
-    if (product.productCategory === 'Switches') {
+    if (product.productCategory === "Switches") {
       setQuantity(5);
     } else {
       setQuantity(1);
@@ -162,7 +160,7 @@ export default function Catalog() {
     setShowError(false);
     setErrorMessage("");
     setQuantity(1); // Reset to default quantity
-    
+
     // Reset multi-step modal states
     setCurrentStep(1);
     setContactDetails({ fullName: "", contactNumber: "" });
@@ -181,31 +179,42 @@ export default function Catalog() {
   const handleBuyNow = () => {
     // Ensure quantity is positive
     if (quantity <= 0) {
-      showErrorMessage('Quantity must be greater than 0');
+      showErrorMessage("Quantity must be greater than 0");
       return;
     }
-    
+
     // Validate quantity against stock if available
-    if (selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number') {
+    if (
+      selectedProduct?.hasSheetData &&
+      typeof selectedProduct.stock === "number"
+    ) {
       if (quantity > selectedProduct.stock) {
-        showErrorMessage(`Quantity cannot exceed available stock (${selectedProduct.stock} pieces)`);
+        showErrorMessage(
+          `Quantity cannot exceed available stock (${selectedProduct.stock} pieces)`
+        );
         return;
       }
     }
-    
+
     // Validate increments of 5 for switches
-    if (selectedProduct?.productCategory === 'Switches' && quantity % 5 !== 0) {
-      showErrorMessage('For switches, quantity must be in increments of 5 (e.g., 5, 10, 15, 20...)');
+    if (selectedProduct?.productCategory === "Switches" && quantity % 5 !== 0) {
+      showErrorMessage(
+        "For switches, quantity must be in increments of 5 (e.g., 5, 10, 15, 20...)"
+      );
       return;
     }
-    
+
     // Calculate total amount
     let calculatedTotal = 0;
-    if (selectedProduct?.hasSheetData && selectedProduct?.price && selectedProduct.price > 0) {
+    if (
+      selectedProduct?.hasSheetData &&
+      selectedProduct?.price &&
+      selectedProduct.price > 0
+    ) {
       calculatedTotal = quantity * selectedProduct.price;
     }
     setTotalAmount(calculatedTotal);
-    
+
     // Clear any previous errors and proceed to next step
     setShowError(false);
     setErrorMessage("");
@@ -217,69 +226,72 @@ export default function Catalog() {
     if (currentStep === 2) {
       // Validate contact details
       if (!contactDetails.fullName.trim()) {
-        showErrorMessage('Please enter your full name');
+        showErrorMessage("Please enter your full name");
         return;
       }
       if (!contactDetails.contactNumber.trim()) {
-        showErrorMessage('Please enter your contact number');
+        showErrorMessage("Please enter your contact number");
         return;
       }
     } else if (currentStep === 3) {
       // Validate delivery option
       if (!deliveryOption) {
-        showErrorMessage('Please select delivery or pickup option');
+        showErrorMessage("Please select delivery or pickup option");
         return;
       }
-      if (deliveryOption === 'delivery' && !deliveryAddress.trim()) {
-        showErrorMessage('Please enter your delivery address');
+      if (deliveryOption === "delivery" && !deliveryAddress.trim()) {
+        showErrorMessage("Please enter your delivery address");
         return;
       }
     } else if (currentStep === 4) {
       // Validate payment method
       if (!paymentMethod) {
-        showErrorMessage('Please select a payment method');
+        showErrorMessage("Please select a payment method");
         return;
       }
     }
-    
+
     setShowError(false);
     setErrorMessage("");
-    setCurrentStep(prev => prev + 1);
+    setCurrentStep((prev) => prev + 1);
   };
 
   const handlePrevStep = () => {
     setShowError(false);
     setErrorMessage("");
-    setCurrentStep(prev => prev - 1);
+    setCurrentStep((prev) => prev - 1);
   };
 
   const generateFinalPrompt = () => {
     let prompt = `📋 ORDER DETAILS:\n\n`;
     prompt += `Customer: ${contactDetails.fullName}\n`;
     prompt += `Contact: ${contactDetails.contactNumber}\n\n`;
-    
+
     prompt += `🛍️ PRODUCT:\n`;
     prompt += `${selectedProduct?.productName} - ${quantity} pieces\n`;
-    
+
     prompt += `📦 DELIVERY:\n`;
-    if (deliveryOption === 'delivery') {
+    if (deliveryOption === "delivery") {
       prompt += `Delivery via Maxim/Grab to: ${deliveryAddress}\n`;
       prompt += `Delivery Fee: To be calculated and confirmed\n\n`;
     } else {
       prompt += `Pickup (Near UM Matina only)\n`;
       prompt += `Delivery Fee: Free (Pickup)\n\n`;
     }
-    
+
     prompt += `💰 TOTAL AMOUNT:\n`;
-    const finalAmount = selectedProduct?.hasSheetData && selectedProduct?.price && selectedProduct.price > 0 
-      ? totalAmount.toLocaleString() 
-      : 'Contact for pricing';
+    const finalAmount =
+      selectedProduct?.hasSheetData &&
+      selectedProduct?.price &&
+      selectedProduct.price > 0
+        ? totalAmount.toLocaleString()
+        : "Contact for pricing";
     prompt += `₱${finalAmount}\n\n`;
-    
+
     prompt += `💳 PAYMENT METHOD: ${paymentMethod.toUpperCase()}\n\n`;
     prompt += `📸 Please find attached the screenshot of my payment receipt.\n\n`;
     prompt += `Thank you for your service! Looking forward to receiving my order.`;
-    
+
     setGeneratedPrompt(prompt);
     setIsPromptGenerated(true);
     setIsCopied(false);
@@ -293,43 +305,43 @@ export default function Catalog() {
         setIsCopied(true);
       } else {
         // Fallback for older browsers or non-HTTPS environments
-        const textArea = document.createElement('textarea');
+        const textArea = document.createElement("textarea");
         textArea.value = generatedPrompt;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
+
         try {
-          document.execCommand('copy');
+          document.execCommand("copy");
           setIsCopied(true);
         } catch (err) {
-          console.error('Fallback copy failed: ', err);
+          console.error("Fallback copy failed: ", err);
           // If both methods fail, show the text for manual copying
           alert(`Copy this text manually:\n\n${generatedPrompt}`);
         }
-        
+
         document.body.removeChild(textArea);
       }
     } catch (err) {
       console.error("Failed to copy text: ", err);
       // If modern API fails, try fallback
       try {
-        const textArea = document.createElement('textarea');
+        const textArea = document.createElement("textarea");
         textArea.value = generatedPrompt;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        document.execCommand('copy');
+        document.execCommand("copy");
         document.body.removeChild(textArea);
         setIsCopied(true);
       } catch (fallbackErr) {
-        console.error('All copy methods failed: ', fallbackErr);
+        console.error("All copy methods failed: ", fallbackErr);
         alert(`Copy this text manually:\n\n${generatedPrompt}`);
       }
     }
@@ -352,6 +364,63 @@ export default function Catalog() {
         <FilterPanel />
         <FilterBreadcrumbs />
 
+        {/* Search Breadcrumbs */}
+        {submittedQuery.trim() ? (
+          <div className="mb-6 flex justify-between items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-4">
+            <div>
+              <span className="text-gray-500">Search results for: </span>
+              <span className="font-medium text-white bg-black px-3 py-1 rounded-full">
+                "{submittedQuery}"
+              </span>
+              {/* <span className="text-gray-400 mx-2">•</span>
+              <span className="text-gray-500">
+                {(() => {
+                  const searchTerm = submittedQuery.trim().toLowerCase();
+                  const filteredProducts = products.filter(
+                    (product) =>
+                      product.productName.toLowerCase().includes(searchTerm) ||
+                      product.productCategory
+                        .toLowerCase()
+                        .includes(searchTerm) ||
+                      product.switchType?.toLowerCase().includes(searchTerm) ||
+                      product.keyboardProfile
+                        ?.toLowerCase()
+                        .includes(searchTerm)
+                  );
+                  const count = filteredProducts.length;
+                  return count === 0
+                    ? "No products found"
+                    : count === 1
+                    ? "1 product found"
+                    : `${count} products found`;
+                })()}
+              </span> */}
+            </div>
+            <div>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSubmittedQuery("");
+                }}
+                className="ml-2 text-blue-600 hover:text-blue-800 underline font-medium"
+              >
+                Clear search
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-6 flex items-center gap-2 text-sm text-gray-600 bg-gray-100 rounded-lg p-4">
+            <span className="font-medium text-black">
+              Showing all products
+            </span>
+            <span className="text-gray-400 mx-2">•</span>
+            <span className="text-gray-500">
+              {products.length} {products.length === 1 ? "product" : "products"}{" "}
+              available
+            </span>
+          </div>
+        )}
+
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {isLoading ? (
@@ -360,11 +429,16 @@ export default function Catalog() {
             (() => {
               const searchTerm = submittedQuery.trim().toLowerCase();
               const filteredProducts = searchTerm
-                ? products.filter(product =>
-                    product.productName.toLowerCase().includes(searchTerm) ||
-                    product.productCategory.toLowerCase().includes(searchTerm) ||
-                    (product.switchType?.toLowerCase().includes(searchTerm)) ||
-                    (product.keyboardProfile?.toLowerCase().includes(searchTerm))
+                ? products.filter(
+                    (product) =>
+                      product.productName.toLowerCase().includes(searchTerm) ||
+                      product.productCategory
+                        .toLowerCase()
+                        .includes(searchTerm) ||
+                      product.switchType?.toLowerCase().includes(searchTerm) ||
+                      product.keyboardProfile
+                        ?.toLowerCase()
+                        .includes(searchTerm)
                   )
                 : products;
               if (filteredProducts.length === 0 && searchTerm) {
@@ -374,7 +448,8 @@ export default function Catalog() {
                       No products found for "{submittedQuery}"
                     </div>
                     <div className="text-gray-400 text-sm">
-                      Try different keywords or clear the search to see all products
+                      Try different keywords or clear the search to see all
+                      products
                     </div>
                   </div>
                 );
@@ -408,7 +483,7 @@ export default function Catalog() {
           className="absolute z-20"
           style={{
             top: "2vw",
-            right: "8vw"
+            right: "8vw",
           }}
         >
           <p
@@ -544,7 +619,9 @@ export default function Catalog() {
                                 Price:
                               </span>
                               <p className="font-semibold text-gray-900 text-base">
-                                ₱{selectedProduct.price || "Contact for pricing"}/pc
+                                ₱
+                                {selectedProduct.price || "Contact for pricing"}
+                                /pc
                               </p>
                             </div>
                           </>
@@ -577,7 +654,10 @@ export default function Catalog() {
                             <button
                               type="button"
                               onClick={() => {
-                                if (selectedProduct?.productCategory === 'Switches') {
+                                if (
+                                  selectedProduct?.productCategory ===
+                                  "Switches"
+                                ) {
                                   const newValue = Math.max(5, quantity - 5);
                                   setQuantity(newValue);
                                 } else {
@@ -599,30 +679,67 @@ export default function Catalog() {
                               onChange={(e) => {
                                 const value = parseInt(e.target.value, 10);
                                 if (!isNaN(value) && value > 0) {
-                                  if (selectedProduct?.productCategory === 'Switches') {
+                                  if (
+                                    selectedProduct?.productCategory ===
+                                    "Switches"
+                                  ) {
                                     // For switches, round to nearest multiple of 5, minimum 5
-                                    const roundedValue = Math.max(5, Math.round(value / 5) * 5);
+                                    const roundedValue = Math.max(
+                                      5,
+                                      Math.round(value / 5) * 5
+                                    );
                                     setQuantity(roundedValue);
                                   } else {
                                     setQuantity(value);
                                   }
-                                } else if (e.target.value === '') {
-                                  setQuantity(selectedProduct?.productCategory === 'Switches' ? 5 : 1);
+                                } else if (e.target.value === "") {
+                                  setQuantity(
+                                    selectedProduct?.productCategory ===
+                                      "Switches"
+                                      ? 5
+                                      : 1
+                                  );
                                 }
                               }}
-                              min={selectedProduct?.productCategory === 'Switches' ? 5 : 1}
-                              max={selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : undefined}
+                              min={
+                                selectedProduct?.productCategory === "Switches"
+                                  ? 5
+                                  : 1
+                              }
+                              max={
+                                selectedProduct?.hasSheetData &&
+                                typeof selectedProduct.stock === "number"
+                                  ? selectedProduct.stock
+                                  : undefined
+                              }
                             />
                             <button
                               type="button"
                               onClick={() => {
-                                if (selectedProduct?.productCategory === 'Switches') {
-                                  const maxStock = selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : 9999;
-                                  const newValue = Math.min(maxStock, quantity + 5);
+                                if (
+                                  selectedProduct?.productCategory ===
+                                  "Switches"
+                                ) {
+                                  const maxStock =
+                                    selectedProduct?.hasSheetData &&
+                                    typeof selectedProduct.stock === "number"
+                                      ? selectedProduct.stock
+                                      : 9999;
+                                  const newValue = Math.min(
+                                    maxStock,
+                                    quantity + 5
+                                  );
                                   setQuantity(newValue);
                                 } else {
-                                  const maxStock = selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : 9999;
-                                  const newValue = Math.min(maxStock, quantity + 1);
+                                  const maxStock =
+                                    selectedProduct?.hasSheetData &&
+                                    typeof selectedProduct.stock === "number"
+                                      ? selectedProduct.stock
+                                      : 9999;
+                                  const newValue = Math.min(
+                                    maxStock,
+                                    quantity + 1
+                                  );
                                   setQuantity(newValue);
                                 }
                               }}
@@ -638,15 +755,18 @@ export default function Catalog() {
                             disabled={selectedProduct?.isLoadingDetails}
                             className="flex-grow text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {selectedProduct?.isLoadingDetails ? 'Loading stock...' : 'Buy Now'}
+                            {selectedProduct?.isLoadingDetails
+                              ? "Loading stock..."
+                              : "Buy Now"}
                           </Button>
                         </div>
-                        {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
-                          <p className="text-xs text-gray-500 mt-2">
-                            Maximum available: {selectedProduct.stock} pieces
-                          </p>
-                        )}
-                        
+                        {selectedProduct?.hasSheetData &&
+                          typeof selectedProduct.stock === "number" && (
+                            <p className="text-xs text-gray-500 mt-2">
+                              Maximum available: {selectedProduct.stock} pieces
+                            </p>
+                          )}
+
                         {/* Error Message - Desktop */}
                         {showError && (
                           <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -696,10 +816,14 @@ export default function Catalog() {
                   {currentStep === 2 && (
                     <div className="mt-8 space-y-6">
                       <div className="text-center mb-6">
-                        <h3 className="text-xl font-semibold text-gray-900">Contact Details</h3>
-                        <p className="text-sm text-gray-600 mt-1">Step 1 of 4</p>
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          Contact Details
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Step 1 of 4
+                        </p>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -710,13 +834,15 @@ export default function Catalog() {
                             placeholder="Enter your full name"
                             className="w-full text-sm"
                             value={contactDetails.fullName}
-                            onChange={(e) => setContactDetails(prev => ({
-                              ...prev,
-                              fullName: e.target.value
-                            }))}
+                            onChange={(e) =>
+                              setContactDetails((prev) => ({
+                                ...prev,
+                                fullName: e.target.value,
+                              }))
+                            }
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Contact Number *
@@ -726,10 +852,12 @@ export default function Catalog() {
                             placeholder="09XX XXX XXXX"
                             className="w-full text-sm"
                             value={contactDetails.contactNumber}
-                            onChange={(e) => setContactDetails(prev => ({
-                              ...prev,
-                              contactNumber: e.target.value
-                            }))}
+                            onChange={(e) =>
+                              setContactDetails((prev) => ({
+                                ...prev,
+                                contactNumber: e.target.value,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -764,69 +892,101 @@ export default function Catalog() {
                   {currentStep === 3 && (
                     <div className="mt-8 space-y-6">
                       <div className="text-center mb-6">
-                        <h3 className="text-xl font-semibold text-gray-900">Delivery Options</h3>
-                        <p className="text-sm text-gray-600 mt-1">Step 2 of 4</p>
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          Delivery Options
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Step 2 of 4
+                        </p>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-3">
                             How would you like to receive your order? *
                           </label>
-                          <RadioGroup value={deliveryOption} onValueChange={setDeliveryOption}>
+                          <RadioGroup
+                            value={deliveryOption}
+                            onValueChange={setDeliveryOption}
+                          >
                             <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="pickup" id="pickup-desktop" />
-                              <label htmlFor="pickup-desktop" className="text-sm text-gray-700 cursor-pointer">
+                              <RadioGroupItem
+                                value="pickup"
+                                id="pickup-desktop"
+                              />
+                              <label
+                                htmlFor="pickup-desktop"
+                                className="text-sm text-gray-700 cursor-pointer"
+                              >
                                 Pickup (Near UM Matina only)
                               </label>
                             </div>
                             <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="delivery" id="delivery-desktop" />
-                              <label htmlFor="delivery-desktop" className="text-sm text-gray-700 cursor-pointer">
+                              <RadioGroupItem
+                                value="delivery"
+                                id="delivery-desktop"
+                              />
+                              <label
+                                htmlFor="delivery-desktop"
+                                className="text-sm text-gray-700 cursor-pointer"
+                              >
                                 Delivery via Maxim/Grab (Davao City only)
                               </label>
                             </div>
                             <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="shipping" id="shipping-desktop" />
-                              <label htmlFor="shipping-desktop" className="text-sm text-gray-700 cursor-pointer">
+                              <RadioGroupItem
+                                value="shipping"
+                                id="shipping-desktop"
+                              />
+                              <label
+                                htmlFor="shipping-desktop"
+                                className="text-sm text-gray-700 cursor-pointer"
+                              >
                                 Domestic shipping via J&T (Within Philippines)
                               </label>
                             </div>
                           </RadioGroup>
                         </div>
-                        
-                        {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
+
+                        {(deliveryOption === "delivery" ||
+                          deliveryOption === "shipping") && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {deliveryOption === 'delivery' ? 'Delivery Address *' : 'Shipping Address *'}
+                              {deliveryOption === "delivery"
+                                ? "Delivery Address *"
+                                : "Shipping Address *"}
                             </label>
                             <textarea
                               placeholder={
-                                deliveryOption === 'delivery' 
-                                  ? "Enter your complete address for Maxim/Grab delivery" 
+                                deliveryOption === "delivery"
+                                  ? "Enter your complete address for Maxim/Grab delivery"
                                   : "Enter your complete address for J&T shipping"
                               }
                               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               rows={3}
                               value={deliveryAddress}
-                              onChange={(e) => setDeliveryAddress(e.target.value)}
+                              onChange={(e) =>
+                                setDeliveryAddress(e.target.value)
+                              }
                             />
                           </div>
                         )}
-                        
-                        {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
+
+                        {(deliveryOption === "delivery" ||
+                          deliveryOption === "shipping") && (
                           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                             <div className="flex items-start gap-2">
                               <span className="text-blue-600 text-lg">ℹ️</span>
                               <div>
                                 <p className="text-sm font-medium text-blue-900">
-                                  {deliveryOption === 'delivery' ? 'Delivery Fee Calculation' : 'Shipping Fee Calculation'}
+                                  {deliveryOption === "delivery"
+                                    ? "Delivery Fee Calculation"
+                                    : "Shipping Fee Calculation"}
                                 </p>
                                 <p className="text-sm text-blue-800 mt-1">
-                                  {deliveryOption === 'delivery' 
-                                    ? 'The delivery fee via Maxim/Grab will be calculated based on your location within Davao City and communicated after we receive your order details and payment screenshot.'
-                                    : 'The shipping fee via J&T will be calculated based on your location within the Philippines and communicated after we receive your order details and payment screenshot.'
-                                  }
+                                  {deliveryOption === "delivery"
+                                    ? "The delivery fee via Maxim/Grab will be calculated based on your location within Davao City and communicated after we receive your order details and payment screenshot."
+                                    : "The shipping fee via J&T will be calculated based on your location within the Philippines and communicated after we receive your order details and payment screenshot."}
                                 </p>
                               </div>
                             </div>
@@ -864,59 +1024,89 @@ export default function Catalog() {
                   {currentStep === 4 && (
                     <div className="mt-8 space-y-6">
                       <div className="text-center mb-6">
-                        <h3 className="text-xl font-semibold text-gray-900">Payment Method</h3>
-                        <p className="text-sm text-gray-600 mt-1">Step 3 of 4</p>
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          Payment Method
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Step 3 of 4
+                        </p>
                       </div>
-                      
+
                       <div className="bg-gray-50 p-4 rounded-lg mb-6">
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-700">Subtotal:</span>
+                            <span className="text-sm text-gray-700">
+                              Subtotal:
+                            </span>
                             <span className="text-sm font-medium text-gray-900">
-                              ₱{totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}
+                              ₱
+                              {totalAmount > 0
+                                ? totalAmount.toLocaleString()
+                                : "Contact for pricing"}
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-700">Delivery Fee:</span>
+                            <span className="text-sm text-gray-700">
+                              Delivery Fee:
+                            </span>
                             <span className="text-sm text-gray-600">
-                              {deliveryOption === 'delivery' ? 'To be calculated' : 'Free (Pickup)'}
+                              {deliveryOption === "delivery"
+                                ? "To be calculated"
+                                : "Free (Pickup)"}
                             </span>
                           </div>
                           <div className="border-t border-gray-300 pt-2">
                             <div className="flex justify-between items-center">
-                              <span className="text-base font-semibold text-gray-900">Total Amount:</span>
                               <span className="text-base font-semibold text-gray-900">
-                                {deliveryOption === 'delivery' 
-                                  ? `₱${totalAmount}` 
-                                  : `₱${totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}`
-                                }
+                                Total Amount:
+                              </span>
+                              <span className="text-base font-semibold text-gray-900">
+                                {deliveryOption === "delivery"
+                                  ? `₱${totalAmount}`
+                                  : `₱${
+                                      totalAmount > 0
+                                        ? totalAmount.toLocaleString()
+                                        : "Contact for pricing"
+                                    }`}
                               </span>
                             </div>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-3">
                             Select Payment Method *
                           </label>
-                          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                          <RadioGroup
+                            value={paymentMethod}
+                            onValueChange={setPaymentMethod}
+                          >
                             <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="gcash" id="gcash-desktop" />
-                              <label htmlFor="gcash-desktop" className="text-sm text-gray-700 cursor-pointer">
+                              <RadioGroupItem
+                                value="gcash"
+                                id="gcash-desktop"
+                              />
+                              <label
+                                htmlFor="gcash-desktop"
+                                className="text-sm text-gray-700 cursor-pointer"
+                              >
                                 GCash
                               </label>
                             </div>
                             <div className="flex items-center space-x-3">
                               <RadioGroupItem value="bpi" id="bpi-desktop" />
-                              <label htmlFor="bpi-desktop" className="text-sm text-gray-700 cursor-pointer">
+                              <label
+                                htmlFor="bpi-desktop"
+                                className="text-sm text-gray-700 cursor-pointer"
+                              >
                                 BPI
                               </label>
                             </div>
                           </RadioGroup>
                         </div>
-                        
+
                         {paymentMethod && (
                           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                             <div className="text-center">
@@ -924,7 +1114,9 @@ export default function Catalog() {
                                 {/* QR Code placeholder - you'll need to add actual QR codes */}
                                 <div className="text-center">
                                   <div className="w-32 h-32 bg-gray-200 rounded mb-2 flex items-center justify-center">
-                                    <span className="text-xs text-gray-500">QR Code</span>
+                                    <span className="text-xs text-gray-500">
+                                      QR Code
+                                    </span>
                                   </div>
                                   <p className="text-xs font-medium text-gray-700">
                                     {paymentMethod.toUpperCase()} Payment
@@ -932,7 +1124,10 @@ export default function Catalog() {
                                 </div>
                               </div>
                               <p className="text-sm text-blue-700 font-medium">
-                                Scan this QR code to pay ₱{totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}
+                                Scan this QR code to pay ₱
+                                {totalAmount > 0
+                                  ? totalAmount.toLocaleString()
+                                  : "Contact for pricing"}
                               </p>
                             </div>
                           </div>
@@ -970,54 +1165,92 @@ export default function Catalog() {
                   {currentStep === 5 && (
                     <div className="mt-8 space-y-6">
                       <div className="text-center mb-6">
-                        <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
-                        <p className="text-sm text-gray-600 mt-1">Step 4 of 4</p>
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          Order Summary
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Step 4 of 4
+                        </p>
                       </div>
-                      
+
                       <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">Customer:</p>
-                          <p className="text-sm text-gray-900">{contactDetails.fullName}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Contact:</p>
-                          <p className="text-sm text-gray-900">{contactDetails.contactNumber}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Product:</p>
-                          <p className="text-sm text-gray-900">{selectedProduct?.productName} × {quantity}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Delivery:</p>
+                          <p className="text-sm font-medium text-gray-700">
+                            Customer:
+                          </p>
                           <p className="text-sm text-gray-900">
-                            {deliveryOption === 'delivery' ? `Delivery to: ${deliveryAddress}` : 'Pickup'}
+                            {contactDetails.fullName}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-700">Payment:</p>
-                          <p className="text-sm text-gray-900">{paymentMethod.toUpperCase()}</p>
+                          <p className="text-sm font-medium text-gray-700">
+                            Contact:
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            {contactDetails.contactNumber}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">
+                            Product:
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            {selectedProduct?.productName} × {quantity}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">
+                            Delivery:
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            {deliveryOption === "delivery"
+                              ? `Delivery to: ${deliveryAddress}`
+                              : "Pickup"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">
+                            Payment:
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            {paymentMethod.toUpperCase()}
+                          </p>
                         </div>
                         <div className="pt-2 border-t border-gray-200 space-y-1">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-700">Subtotal:</span>
+                            <span className="text-sm text-gray-700">
+                              Subtotal:
+                            </span>
                             <span className="text-sm text-gray-900">
-                              ₱{totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}
+                              ₱
+                              {totalAmount > 0
+                                ? totalAmount.toLocaleString()
+                                : "Contact for pricing"}
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-700">Delivery Fee:</span>
+                            <span className="text-sm text-gray-700">
+                              Delivery Fee:
+                            </span>
                             <span className="text-sm text-gray-600">
-                              {deliveryOption === 'delivery' ? 'To be calculated' : 'Free'}
+                              {deliveryOption === "delivery"
+                                ? "To be calculated"
+                                : "Free"}
                             </span>
                           </div>
                           <div className="border-t border-gray-200 pt-1">
                             <div className="flex justify-between items-center">
-                              <span className="text-base font-semibold text-gray-900">Total:</span>
                               <span className="text-base font-semibold text-gray-900">
-                                {deliveryOption === 'delivery' 
-                                  ? `₱${totalAmount}` 
-                                  : `₱${totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}`
-                                }
+                                Total:
+                              </span>
+                              <span className="text-base font-semibold text-gray-900">
+                                {deliveryOption === "delivery"
+                                  ? `₱${totalAmount}`
+                                  : `₱${
+                                      totalAmount > 0
+                                        ? totalAmount.toLocaleString()
+                                        : "Contact for pricing"
+                                    }`}
                               </span>
                             </div>
                           </div>
@@ -1026,7 +1259,10 @@ export default function Catalog() {
 
                       <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                         <p className="text-sm text-yellow-800">
-                          📸 <strong>Important:</strong> After clicking "Generate Prompt" below, please take a screenshot of your payment receipt and send both the generated prompt and receipt screenshot to our messenger.
+                          📸 <strong>Important:</strong> After clicking
+                          "Generate Prompt" below, please take a screenshot of
+                          your payment receipt and send both the generated
+                          prompt and receipt screenshot to our messenger.
                         </p>
                       </div>
 
@@ -1054,17 +1290,21 @@ export default function Catalog() {
                               className="w-full text-sm"
                               variant={isCopied ? "default" : "outline"}
                             >
-                              {isCopied ? "✓ Copied to Clipboard!" : "Copy Prompt to Clipboard"}
+                              {isCopied
+                                ? "✓ Copied to Clipboard!"
+                                : "Copy Prompt to Clipboard"}
                             </Button>
                           </div>
                         )}
-                        
                       </div>
 
                       <div className="flex flex-col gap-3 pt-4">
                         <button
                           onClick={() => {
-                            window.open("https://m.me/173538739173933", "_blank");
+                            window.open(
+                              "https://m.me/173538739173933",
+                              "_blank"
+                            );
                             closeModal();
                           }}
                           className="bg-black text-white px-6 py-3 rounded font-medium text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -1180,7 +1420,9 @@ export default function Catalog() {
                         <button
                           type="button"
                           onClick={() => {
-                            if (selectedProduct?.productCategory === 'Switches') {
+                            if (
+                              selectedProduct?.productCategory === "Switches"
+                            ) {
                               const newValue = Math.max(5, quantity - 5);
                               setQuantity(newValue);
                             } else {
@@ -1202,29 +1444,57 @@ export default function Catalog() {
                           onChange={(e) => {
                             const value = parseInt(e.target.value, 10);
                             if (!isNaN(value) && value > 0) {
-                              if (selectedProduct?.productCategory === 'Switches') {
+                              if (
+                                selectedProduct?.productCategory === "Switches"
+                              ) {
                                 // For switches, round to nearest multiple of 5, minimum 5
-                                const roundedValue = Math.max(5, Math.round(value / 5) * 5);
+                                const roundedValue = Math.max(
+                                  5,
+                                  Math.round(value / 5) * 5
+                                );
                                 setQuantity(roundedValue);
                               } else {
                                 setQuantity(value);
                               }
-                            } else if (e.target.value === '') {
-                              setQuantity(selectedProduct?.productCategory === 'Switches' ? 5 : 1);
+                            } else if (e.target.value === "") {
+                              setQuantity(
+                                selectedProduct?.productCategory === "Switches"
+                                  ? 5
+                                  : 1
+                              );
                             }
                           }}
-                          min={selectedProduct?.productCategory === 'Switches' ? 5 : 1}
-                          max={selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : undefined}
+                          min={
+                            selectedProduct?.productCategory === "Switches"
+                              ? 5
+                              : 1
+                          }
+                          max={
+                            selectedProduct?.hasSheetData &&
+                            typeof selectedProduct.stock === "number"
+                              ? selectedProduct.stock
+                              : undefined
+                          }
                         />
                         <button
                           type="button"
                           onClick={() => {
-                            if (selectedProduct?.productCategory === 'Switches') {
-                              const maxStock = selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : 9999;
+                            if (
+                              selectedProduct?.productCategory === "Switches"
+                            ) {
+                              const maxStock =
+                                selectedProduct?.hasSheetData &&
+                                typeof selectedProduct.stock === "number"
+                                  ? selectedProduct.stock
+                                  : 9999;
                               const newValue = Math.min(maxStock, quantity + 5);
                               setQuantity(newValue);
                             } else {
-                              const maxStock = selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' ? selectedProduct.stock : 9999;
+                              const maxStock =
+                                selectedProduct?.hasSheetData &&
+                                typeof selectedProduct.stock === "number"
+                                  ? selectedProduct.stock
+                                  : 9999;
                               const newValue = Math.min(maxStock, quantity + 1);
                               setQuantity(newValue);
                             }
@@ -1241,15 +1511,18 @@ export default function Catalog() {
                         disabled={selectedProduct?.isLoadingDetails}
                         className="flex-grow text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {selectedProduct?.isLoadingDetails ? 'Loading stock...' : 'Buy Now'}
+                        {selectedProduct?.isLoadingDetails
+                          ? "Loading stock..."
+                          : "Buy Now"}
                       </Button>
                     </div>
-                    {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
-                      <p className="text-xs text-gray-500">
-                        Maximum available: {selectedProduct.stock} pieces
-                      </p>
-                    )}
-                    
+                    {selectedProduct?.hasSheetData &&
+                      typeof selectedProduct.stock === "number" && (
+                        <p className="text-xs text-gray-500">
+                          Maximum available: {selectedProduct.stock} pieces
+                        </p>
+                      )}
+
                     {/* Error Message - Mobile */}
                     {showError && (
                       <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -1299,10 +1572,12 @@ export default function Catalog() {
               {currentStep === 2 && (
                 <div className="mt-6 space-y-4">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Contact Details</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Contact Details
+                    </h3>
                     <p className="text-xs text-gray-600 mt-1">Step 1 of 4</p>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1313,13 +1588,15 @@ export default function Catalog() {
                         placeholder="Enter your full name"
                         className="w-full text-sm"
                         value={contactDetails.fullName}
-                        onChange={(e) => setContactDetails(prev => ({
-                          ...prev,
-                          fullName: e.target.value
-                        }))}
+                        onChange={(e) =>
+                          setContactDetails((prev) => ({
+                            ...prev,
+                            fullName: e.target.value,
+                          }))
+                        }
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Contact Number *
@@ -1329,10 +1606,12 @@ export default function Catalog() {
                         placeholder="09XX XXX XXXX"
                         className="w-full text-sm"
                         value={contactDetails.contactNumber}
-                        onChange={(e) => setContactDetails(prev => ({
-                          ...prev,
-                          contactNumber: e.target.value
-                        }))}
+                        onChange={(e) =>
+                          setContactDetails((prev) => ({
+                            ...prev,
+                            contactNumber: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                   </div>
@@ -1348,10 +1627,7 @@ export default function Catalog() {
                   )}
 
                   <div className="flex flex-col gap-3 pt-4">
-                    <Button
-                      onClick={handleNextStep}
-                      className="w-full text-sm"
-                    >
+                    <Button onClick={handleNextStep} className="w-full text-sm">
                       Continue to Delivery Options
                     </Button>
                     <button
@@ -1367,46 +1643,69 @@ export default function Catalog() {
               {currentStep === 3 && (
                 <div className="mt-6 space-y-4">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Delivery Options</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Delivery Options
+                    </h3>
                     <p className="text-xs text-gray-600 mt-1">Step 2 of 4</p>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         How would you like to receive your order? *
                       </label>
-                      <RadioGroup value={deliveryOption} onValueChange={setDeliveryOption}>
+                      <RadioGroup
+                        value={deliveryOption}
+                        onValueChange={setDeliveryOption}
+                      >
                         <div className="flex items-center space-x-3">
                           <RadioGroupItem value="pickup" id="pickup-mobile" />
-                          <label htmlFor="pickup-mobile" className="text-sm text-gray-700 cursor-pointer">
+                          <label
+                            htmlFor="pickup-mobile"
+                            className="text-sm text-gray-700 cursor-pointer"
+                          >
                             Pickup (Near UM Matina only)
                           </label>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <RadioGroupItem value="delivery" id="delivery-mobile" />
-                          <label htmlFor="delivery-mobile" className="text-sm text-gray-700 cursor-pointer">
+                          <RadioGroupItem
+                            value="delivery"
+                            id="delivery-mobile"
+                          />
+                          <label
+                            htmlFor="delivery-mobile"
+                            className="text-sm text-gray-700 cursor-pointer"
+                          >
                             Delivery via Maxim/Grab (Davao City only)
                           </label>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <RadioGroupItem value="shipping" id="shipping-mobile" />
-                          <label htmlFor="shipping-mobile" className="text-sm text-gray-700 cursor-pointer">
+                          <RadioGroupItem
+                            value="shipping"
+                            id="shipping-mobile"
+                          />
+                          <label
+                            htmlFor="shipping-mobile"
+                            className="text-sm text-gray-700 cursor-pointer"
+                          >
                             Domestic shipping via J&T (Within Philippines)
                           </label>
                         </div>
                       </RadioGroup>
                     </div>
-                    
-                    {(deliveryOption === 'delivery' || deliveryOption === 'shipping') && (
+
+                    {(deliveryOption === "delivery" ||
+                      deliveryOption === "shipping") && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {deliveryOption === 'delivery' ? 'Delivery Address *' : 'Shipping Address *'}
+                          {deliveryOption === "delivery"
+                            ? "Delivery Address *"
+                            : "Shipping Address *"}
                         </label>
                         <textarea
                           placeholder={
-                            deliveryOption === 'delivery' 
-                              ? "Enter your complete address for Maxim/Grab delivery" 
+                            deliveryOption === "delivery"
+                              ? "Enter your complete address for Maxim/Grab delivery"
                               : "Enter your complete address for J&T shipping"
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1416,29 +1715,37 @@ export default function Catalog() {
                         />
                       </div>
                     )}
-                    
-                    {deliveryOption === 'delivery' && (
+
+                    {deliveryOption === "delivery" && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <div className="flex items-start gap-2">
                           <span className="text-blue-600">🚗</span>
                           <div>
-                            <p className="text-xs font-medium text-blue-900">Delivery via Maxim/Grab</p>
+                            <p className="text-xs font-medium text-blue-900">
+                              Delivery via Maxim/Grab
+                            </p>
                             <p className="text-xs text-blue-800 mt-1">
-                              Available for Davao City only. Delivery fee will be calculated and communicated after we receive your order and payment screenshot.
+                              Available for Davao City only. Delivery fee will
+                              be calculated and communicated after we receive
+                              your order and payment screenshot.
                             </p>
                           </div>
                         </div>
                       </div>
                     )}
-                    
-                    {deliveryOption === 'shipping' && (
+
+                    {deliveryOption === "shipping" && (
                       <div className="bg-green-50 p-3 rounded-lg border border-green-200">
                         <div className="flex items-start gap-2">
                           <span className="text-green-600">📦</span>
                           <div>
-                            <p className="text-xs font-medium text-green-900">Shipping via J&T</p>
+                            <p className="text-xs font-medium text-green-900">
+                              Shipping via J&T
+                            </p>
                             <p className="text-xs text-green-800 mt-1">
-                              Available nationwide in the Philippines. Shipping fee will be calculated and communicated after we receive your order and payment screenshot.
+                              Available nationwide in the Philippines. Shipping
+                              fee will be calculated and communicated after we
+                              receive your order and payment screenshot.
                             </p>
                           </div>
                         </div>
@@ -1457,10 +1764,7 @@ export default function Catalog() {
                   )}
 
                   <div className="flex flex-col gap-3 pt-4">
-                    <Button
-                      onClick={handleNextStep}
-                      className="w-full text-sm"
-                    >
+                    <Button onClick={handleNextStep} className="w-full text-sm">
                       Continue to Payment
                     </Button>
                     <button
@@ -1476,59 +1780,82 @@ export default function Catalog() {
               {currentStep === 4 && (
                 <div className="mt-6 space-y-4">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Payment Method</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Payment Method
+                    </h3>
                     <p className="text-xs text-gray-600 mt-1">Step 3 of 4</p>
                   </div>
-                  
+
                   <div className="bg-gray-50 p-3 rounded-lg mb-4">
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-700">Subtotal:</span>
                         <span className="text-sm font-medium text-gray-900">
-                          ₱{totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}
+                          ₱
+                          {totalAmount > 0
+                            ? totalAmount.toLocaleString()
+                            : "Contact for pricing"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-700">Delivery Fee:</span>
+                        <span className="text-sm text-gray-700">
+                          Delivery Fee:
+                        </span>
                         <span className="text-xs text-gray-600">
-                          {deliveryOption === 'delivery' ? 'To be calculated' : 'Free (Pickup)'}
+                          {deliveryOption === "delivery"
+                            ? "To be calculated"
+                            : "Free (Pickup)"}
                         </span>
                       </div>
                       <div className="border-t border-gray-300 pt-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-base font-semibold text-gray-900">Total:</span>
                           <span className="text-base font-semibold text-gray-900">
-                            {deliveryOption === 'delivery' 
-                              ? `₱${totalAmount}` 
-                              : `₱${totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}`
-                            }
+                            Total:
+                          </span>
+                          <span className="text-base font-semibold text-gray-900">
+                            {deliveryOption === "delivery"
+                              ? `₱${totalAmount}`
+                              : `₱${
+                                  totalAmount > 0
+                                    ? totalAmount.toLocaleString()
+                                    : "Contact for pricing"
+                                }`}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         Select Payment Method *
                       </label>
-                      <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                      <RadioGroup
+                        value={paymentMethod}
+                        onValueChange={setPaymentMethod}
+                      >
                         <div className="flex items-center space-x-3">
                           <RadioGroupItem value="gcash" id="gcash-mobile" />
-                          <label htmlFor="gcash-mobile" className="text-sm text-gray-700 cursor-pointer">
+                          <label
+                            htmlFor="gcash-mobile"
+                            className="text-sm text-gray-700 cursor-pointer"
+                          >
                             GCash
                           </label>
                         </div>
                         <div className="flex items-center space-x-3">
                           <RadioGroupItem value="bpi" id="bpi-mobile" />
-                          <label htmlFor="bpi-mobile" className="text-sm text-gray-700 cursor-pointer">
+                          <label
+                            htmlFor="bpi-mobile"
+                            className="text-sm text-gray-700 cursor-pointer"
+                          >
                             BPI
                           </label>
                         </div>
                       </RadioGroup>
                     </div>
-                    
+
                     {paymentMethod && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <div className="text-center">
@@ -1536,7 +1863,9 @@ export default function Catalog() {
                             {/* QR Code placeholder - you'll need to add actual QR codes */}
                             <div className="text-center">
                               <div className="w-28 h-28 bg-gray-200 rounded mb-2 flex items-center justify-center">
-                                <span className="text-xs text-gray-500">QR Code</span>
+                                <span className="text-xs text-gray-500">
+                                  QR Code
+                                </span>
                               </div>
                               <p className="text-xs font-medium text-gray-700">
                                 {paymentMethod.toUpperCase()}
@@ -1544,7 +1873,10 @@ export default function Catalog() {
                             </div>
                           </div>
                           <p className="text-xs text-blue-700 font-medium">
-                            Scan QR code to pay ₱{totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}
+                            Scan QR code to pay ₱
+                            {totalAmount > 0
+                              ? totalAmount.toLocaleString()
+                              : "Contact for pricing"}
                           </p>
                         </div>
                       </div>
@@ -1582,54 +1914,88 @@ export default function Catalog() {
               {currentStep === 5 && (
                 <div className="mt-6 space-y-4">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Order Summary</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Order Summary
+                    </h3>
                     <p className="text-xs text-gray-600 mt-1">Step 4 of 4</p>
                   </div>
-                  
+
                   <div className="bg-gray-50 p-3 rounded-lg space-y-2">
                     <div>
-                      <p className="text-xs font-medium text-gray-700">Customer:</p>
-                      <p className="text-sm text-gray-900">{contactDetails.fullName}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-700">Contact:</p>
-                      <p className="text-sm text-gray-900">{contactDetails.contactNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-700">Product:</p>
-                      <p className="text-sm text-gray-900">{selectedProduct?.productName} × {quantity}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-700">Delivery:</p>
+                      <p className="text-xs font-medium text-gray-700">
+                        Customer:
+                      </p>
                       <p className="text-sm text-gray-900">
-                        {deliveryOption === 'delivery' ? `Delivery to: ${deliveryAddress}` : 'Pickup'}
+                        {contactDetails.fullName}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-gray-700">Payment:</p>
-                      <p className="text-sm text-gray-900">{paymentMethod.toUpperCase()}</p>
+                      <p className="text-xs font-medium text-gray-700">
+                        Contact:
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        {contactDetails.contactNumber}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-700">
+                        Product:
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        {selectedProduct?.productName} × {quantity}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-700">
+                        Delivery:
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        {deliveryOption === "delivery"
+                          ? `Delivery to: ${deliveryAddress}`
+                          : "Pickup"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-700">
+                        Payment:
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        {paymentMethod.toUpperCase()}
+                      </p>
                     </div>
                     <div className="pt-2 border-t border-gray-200 space-y-1">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-gray-700">Subtotal:</span>
                         <span className="text-sm text-gray-900">
-                          ₱{totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}
+                          ₱
+                          {totalAmount > 0
+                            ? totalAmount.toLocaleString()
+                            : "Contact for pricing"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-700">Delivery Fee:</span>
+                        <span className="text-xs text-gray-700">
+                          Delivery Fee:
+                        </span>
                         <span className="text-xs text-gray-600">
-                          {deliveryOption === 'delivery' ? 'To be calculated' : 'Free'}
+                          {deliveryOption === "delivery"
+                            ? "To be calculated"
+                            : "Free"}
                         </span>
                       </div>
                       <div className="border-t border-gray-200 pt-1">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold text-gray-900">Total:</span>
                           <span className="text-sm font-semibold text-gray-900">
-                            {deliveryOption === 'delivery' 
-                              ? `₱${totalAmount}` 
-                              : `₱${totalAmount > 0 ? totalAmount.toLocaleString() : 'Contact for pricing'}`
-                            }
+                            Total:
+                          </span>
+                          <span className="text-sm font-semibold text-gray-900">
+                            {deliveryOption === "delivery"
+                              ? `₱${totalAmount}`
+                              : `₱${
+                                  totalAmount > 0
+                                    ? totalAmount.toLocaleString()
+                                    : "Contact for pricing"
+                                }`}
                           </span>
                         </div>
                       </div>
@@ -1638,7 +2004,9 @@ export default function Catalog() {
 
                   <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
                     <p className="text-xs text-yellow-800">
-                      📸 <strong>Important:</strong> Take a screenshot of your payment receipt and send both the prompt and receipt to messenger.
+                      📸 <strong>Important:</strong> Take a screenshot of your
+                      payment receipt and send both the prompt and receipt to
+                      messenger.
                     </p>
                   </div>
 
@@ -1666,11 +2034,12 @@ export default function Catalog() {
                           className="w-full text-sm"
                           variant={isCopied ? "default" : "outline"}
                         >
-                          {isCopied ? "✓ Copied to Clipboard!" : "Copy Prompt to Clipboard"}
+                          {isCopied
+                            ? "✓ Copied to Clipboard!"
+                            : "Copy Prompt to Clipboard"}
                         </Button>
                       </div>
                     )}
-                    
                   </div>
 
                   <div className="flex flex-col gap-3 pt-4">
