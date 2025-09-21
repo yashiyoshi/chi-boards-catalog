@@ -13,6 +13,23 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cachedFetch } from "@/lib/cache";
 
+// Product sorting utility - prioritize Best Seller and On Sale items
+const sortProductsByPriority = (products: Product[]): Product[] => {
+  return [...products].sort((a, b) => {
+    // Calculate priority scores (higher = shown first)
+    const scoreA = (a.isBestSeller ? 2 : 0) + (a.isOnSale ? 1 : 0);
+    const scoreB = (b.isBestSeller ? 2 : 0) + (b.isOnSale ? 1 : 0);
+    
+    // Sort by priority score (descending), then by name (ascending) for consistency
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+    
+    // If same priority, sort alphabetically by product name
+    return a.productName.localeCompare(b.productName);
+  });
+};
+
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,8 +71,9 @@ export default function Catalog() {
           600
         );
         
-        // Set basic products immediately for fast initial render
-        setProducts(basicProducts);
+        // Set basic products immediately for fast initial render with priority sorting
+        const sortedBasicProducts = sortProductsByPriority(basicProducts);
+        setProducts(sortedBasicProducts);
         setIsLoading(false); // Products cards can now render with placeholders
         
         // Phase 2: Load stock and pricing data in background
@@ -74,27 +92,29 @@ export default function Catalog() {
           
           // Update products with stock and pricing data
           setProducts(prevProducts => 
-            prevProducts.map(product => {
-              const normalizedName = product.productName.toLowerCase().trim();
-              const stockInfo = stockData[normalizedName];
-              
-              if (stockInfo) {
+            sortProductsByPriority(
+              prevProducts.map(product => {
+                const normalizedName = product.productName.toLowerCase().trim();
+                const stockInfo = stockData[normalizedName];
+                
+                if (stockInfo) {
+                  return {
+                    ...product,
+                    stock: stockInfo.stock,
+                    price: stockInfo.price,
+                    isInStock: stockInfo.isInStock,
+                    hasSheetData: true,
+                    isLoadingDetails: false
+                  };
+                }
+                
                 return {
                   ...product,
-                  stock: stockInfo.stock,
-                  price: stockInfo.price,
-                  isInStock: stockInfo.isInStock,
-                  hasSheetData: true,
+                  hasSheetData: false,
                   isLoadingDetails: false
                 };
-              }
-              
-              return {
-                ...product,
-                hasSheetData: false,
-                isLoadingDetails: false
-              };
-            })
+              })
+            )
           );
           
         } catch (stockError) {
