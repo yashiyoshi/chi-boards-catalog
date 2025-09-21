@@ -23,7 +23,7 @@ interface GoogleSheetsProduct {
   price: number;
   category: string;
   status?: string;
-  qtyIncrement?: string;
+  qtyIncrement?: number;
   profile?: string;
 }
 
@@ -37,7 +37,7 @@ export async function getProductData() {
   const sheetConfigs = [
     {
       name: 'Switches',
-      range: 'C8:H50',
+      range: 'C8:H150',
       category: 'switches',
       columns: {
         productName: 0, // Column C
@@ -48,7 +48,7 @@ export async function getProductData() {
     },
     {
       name: 'Keycaps',
-      range: 'C8:H50',
+      range: 'C8:H150',
       category: 'keycaps', 
       columns: {
         productName: 0, // Column C
@@ -61,7 +61,7 @@ export async function getProductData() {
     },
     {
       name: 'Keyboard',
-      range: 'C8:H50',
+      range: 'C8:H150',
       category: 'keyboards',
       columns: {
         productName: 0, // Column C
@@ -72,7 +72,7 @@ export async function getProductData() {
     },
     {
       name: 'Accessories',
-      range: 'C8:H50',
+      range: 'C8:H150',
       category: 'accessories',
       columns: {
         productName: 0, // Column C
@@ -99,15 +99,15 @@ export async function getProductData() {
       const rows = valueRanges[index]?.values;
       
       if (rows) {
-        const products = rows
-          .filter(row => {
-            const productName = row[config.columns.productName];
-            return productName && 
-                   productName.trim() !== '' && 
-                   productName !== 'PRODUCT' &&
-                   !productName.toLowerCase().includes('link');
-          })
-          .map((row): GoogleSheetsProduct => {
+        const filteredRows = rows.filter(row => {
+          const productName = row[config.columns.productName];
+          return productName && 
+                 productName.trim() !== '' && 
+                 productName !== 'PRODUCT' &&
+                 !productName.toLowerCase().includes('link');
+        });
+        
+        const products = filteredRows.map((row): GoogleSheetsProduct => {
             const productName = row[config.columns.productName] || '';
             let stock: string | number = 0;
             let price = 0;
@@ -134,13 +134,25 @@ export async function getProductData() {
               }
             }
 
+            // Parse quantity increment
+            let qtyIncrement = 5; // default for switches
+            if (config.columns.qtyIncrement !== undefined) {
+              const qtyIncrementValue = row[config.columns.qtyIncrement];
+              if (qtyIncrementValue) {
+                const parsed = parseInt(qtyIncrementValue.toString(), 10);
+                if (!isNaN(parsed) && parsed > 0) {
+                  qtyIncrement = parsed;
+                }
+              }
+            }
+
             return {
               productName,
               stock,
               price,
               category: config.category,
               status: config.columns.status !== undefined ? row[config.columns.status] : undefined,
-              qtyIncrement: config.columns.qtyIncrement !== undefined ? row[config.columns.qtyIncrement] : undefined,
+              qtyIncrement,
               profile: config.columns.profile !== undefined ? row[config.columns.profile] : undefined,
             };
           });

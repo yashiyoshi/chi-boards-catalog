@@ -34,6 +34,7 @@ export interface Product {
   status?: string;
   isInStock?: boolean;
   hasSheetData?: boolean;
+  qtyIncrement?: number;
   // Loading states
   isLoadingDetails?: boolean;
 }
