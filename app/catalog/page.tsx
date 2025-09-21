@@ -42,6 +42,10 @@ export default function Catalog() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showError, setShowError] = useState(false);
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+
   // Multi-step modal states
   const [currentStep, setCurrentStep] = useState(1);
   const [contactDetails, setContactDetails] = useState({
@@ -339,7 +343,11 @@ export default function Catalog() {
         backgroundPosition: "center",
       }}
     >
-      <Header />
+      <Header
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSearchSubmit={() => setSubmittedQuery(searchQuery)}
+      />
       <div className="mx-12">
         <FilterPanel />
         <FilterBreadcrumbs />
@@ -349,13 +357,36 @@ export default function Catalog() {
           {isLoading ? (
             <ProductSkeleton count={8} />
           ) : (
-            products.map((product) => (
-              <ProductCard
-                key={product.slug}
-                product={product}
-                onProductClick={handleProductClick}
-              />
-            ))
+            (() => {
+              const searchTerm = submittedQuery.trim().toLowerCase();
+              const filteredProducts = searchTerm
+                ? products.filter(product =>
+                    product.productName.toLowerCase().includes(searchTerm) ||
+                    product.productCategory.toLowerCase().includes(searchTerm) ||
+                    (product.switchType?.toLowerCase().includes(searchTerm)) ||
+                    (product.keyboardProfile?.toLowerCase().includes(searchTerm))
+                  )
+                : products;
+              if (filteredProducts.length === 0 && searchTerm) {
+                return (
+                  <div className="col-span-full text-center py-12">
+                    <div className="text-gray-600 text-xl mb-2">
+                      No products found for "{submittedQuery}"
+                    </div>
+                    <div className="text-gray-400 text-sm">
+                      Try different keywords or clear the search to see all products
+                    </div>
+                  </div>
+                );
+              }
+              return filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.slug}
+                  product={product}
+                  onProductClick={handleProductClick}
+                />
+              ));
+            })()
           )}
         </div>
       </div>
