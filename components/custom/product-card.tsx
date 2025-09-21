@@ -46,7 +46,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
       );
     }
     if (price > 0) {
-      return `₱${price}/pc`;
+      return `₱${price}`;
     }
     return 'Contact for price';
   };
@@ -104,7 +104,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
           <div className={`text-sm ${!isLoadingDetails && hasSheetData && !isInStock ? 'text-red-500' : 'text-gray-500'}`}>
             Stock: {stockDisplay()}
           </div>
-          <div className="text-sm text-gray-500">{priceDisplay()}</div>
+          <div className="text-sm text-gray-500">{priceDisplay()}/pc</div>
         </div>
       </div>
     </div>

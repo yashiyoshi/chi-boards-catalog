@@ -534,7 +534,8 @@ export default function Catalog() {
                                   setQuantity(newValue);
                                 }
                               }}
-                              className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                              disabled={selectedProduct?.isLoadingDetails}
+                              className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               -
                             </button>
@@ -543,6 +544,7 @@ export default function Catalog() {
                               placeholder="Qty"
                               className="w-20 text-center text-sm border-0 focus:ring-0"
                               value={quantity}
+                              disabled={selectedProduct?.isLoadingDetails}
                               onChange={(e) => {
                                 const value = parseInt(e.target.value, 10);
                                 if (!isNaN(value) && value > 0) {
@@ -573,7 +575,8 @@ export default function Catalog() {
                                   setQuantity(newValue);
                                 }
                               }}
-                              className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                              disabled={selectedProduct?.isLoadingDetails}
+                              className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               +
                             </button>
@@ -581,9 +584,10 @@ export default function Catalog() {
                           <Button
                             variant="default"
                             onClick={handleBuyNow}
-                            className="flex-grow text-sm"
+                            disabled={selectedProduct?.isLoadingDetails}
+                            className="flex-grow text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Buy Now
+                            {selectedProduct?.isLoadingDetails ? 'Loading stock...' : 'Buy Now'}
                           </Button>
                         </div>
                         {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
@@ -1133,7 +1137,8 @@ export default function Catalog() {
                               setQuantity(newValue);
                             }
                           }}
-                          className="px-2 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors text-sm"
+                          disabled={selectedProduct?.isLoadingDetails}
+                          className="px-2 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           -
                         </button>
@@ -1142,6 +1147,7 @@ export default function Catalog() {
                           placeholder="Qty"
                           className="w-16 text-center text-sm border-0 focus:ring-0"
                           value={quantity}
+                          disabled={selectedProduct?.isLoadingDetails}
                           onChange={(e) => {
                             const value = parseInt(e.target.value, 10);
                             if (!isNaN(value) && value > 0) {
@@ -1172,7 +1178,8 @@ export default function Catalog() {
                               setQuantity(newValue);
                             }
                           }}
-                          className="px-2 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors text-sm"
+                          disabled={selectedProduct?.isLoadingDetails}
+                          className="px-2 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           +
                         </button>
@@ -1180,9 +1187,10 @@ export default function Catalog() {
                       <Button
                         variant={"default"}
                         onClick={handleBuyNow}
-                        className="flex-grow text-sm"
+                        disabled={selectedProduct?.isLoadingDetails}
+                        className="flex-grow text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Buy Now
+                        {selectedProduct?.isLoadingDetails ? 'Loading stock...' : 'Buy Now'}
                       </Button>
                     </div>
                     {selectedProduct?.hasSheetData && typeof selectedProduct.stock === 'number' && (
