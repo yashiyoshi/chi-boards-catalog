@@ -70,15 +70,24 @@ export default function ProductCard({
       }
     >
       <div className="relative w-full aspect-square">
-        {/* Best Seller Tag */}
-        {product.isBestSeller && (
-          <div className="absolute top-2 left-2 z-10">
-            <div className="bg-black text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex flex-row gap-2">
-              <p className="text-yellow">★</p>
-              <p className="text-white">Best Seller</p>
+        {/* Tags Container */}
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+          {/* Best Seller Tag */}
+          {product.isBestSeller && (
+            <div className="bg-black text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex flex-row gap-1 items-center">
+              <span className="text-yellow">★</span>
+              <span>Best Seller</span>
             </div>
-          </div>
-        )}
+          )}
+          
+          {/* On Sale Tag */}
+          {product.isOnSale && (
+            <div className="bg-yellow text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex flex-row gap-1 items-center">
+              <span>🔥</span>
+              <span className="text-black">On Sale</span>
+            </div>
+          )}
+        </div>
 
         {/* Loading placeholder */}
         {!imageLoaded && (

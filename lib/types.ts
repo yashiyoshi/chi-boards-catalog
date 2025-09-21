@@ -28,6 +28,7 @@ export interface Product {
   budget: string;
   description: any;
   isBestSeller?: boolean;
+  isOnSale?: boolean;
   // Google Sheets integration fields
   stock?: string | number;
   price?: number;
