@@ -432,6 +432,7 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
         backgroundImage: 'url("/grid-bg-black.png")',
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundAttachment: "fixed",
       }}
     >
       <Header
