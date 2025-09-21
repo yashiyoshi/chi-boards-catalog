@@ -27,6 +27,7 @@ export interface Product {
   keyboardProfile: string;
   budget: string;
   description: any;
+  isBestSeller?: boolean;
   // Google Sheets integration fields
   stock?: string | number;
   price?: number;
