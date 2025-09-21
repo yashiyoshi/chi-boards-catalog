@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import FilterPanel from "@/components/custom/filter-panel";
 import Header from "@/components/custom/header";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import FilterBreadcrumbs from "@/components/custom/filter-breadcrumbs";
@@ -12,6 +11,7 @@ import { Product } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cachedFetch } from "@/lib/cache";
+import FilterPanel from "@/components/custom/filter-panel";
 
 // Product sorting utility - prioritize Best Seller and On Sale items
 const sortProductsByPriority = (products: Product[]): Product[] => {
@@ -19,18 +19,77 @@ const sortProductsByPriority = (products: Product[]): Product[] => {
     // Calculate priority scores (higher = shown first)
     const scoreA = (a.isBestSeller ? 2 : 0) + (a.isOnSale ? 1 : 0);
     const scoreB = (b.isBestSeller ? 2 : 0) + (b.isOnSale ? 1 : 0);
-
+    
     // Sort by priority score (descending), then by name (ascending) for consistency
     if (scoreA !== scoreB) {
       return scoreB - scoreA;
     }
-
+    
     // If same priority, sort alphabetically by product name
     return a.productName.localeCompare(b.productName);
   });
 };
 
-export default function Catalog() {
+// Filter products based on active filters
+const applyFilters = (products: Product[], searchQuery: string, filters: any): Product[] => {
+  let filtered = [...products];
+
+  // Apply search filter
+  if (searchQuery && typeof searchQuery === 'string' && searchQuery.trim()) {
+    const searchTerm = searchQuery.trim().toLowerCase();
+    filtered = filtered.filter(product =>
+      product.productName.toLowerCase().includes(searchTerm) ||
+      product.productCategory.toLowerCase().includes(searchTerm) ||
+      (product.switchType?.toLowerCase().includes(searchTerm))
+    );
+  }
+
+  // Apply product type filters
+  const { keyboards, switches, keycaps } = filters.productType;
+  if (keyboards || switches || keycaps) {
+    filtered = filtered.filter(product => {
+      const category = product.productCategory.toLowerCase();
+      if (keyboards && category.includes('keyboard')) return true;
+      if (switches && category.includes('switch')) return true;
+      if (keycaps && category.includes('keycap')) return true;
+      return false;
+    });
+  }
+
+  // Apply budget filters
+  const { under50, between50and150, over150 } = filters.budget;
+  if (under50 || between50and150 || over150) {
+    filtered = filtered.filter(product => {
+      const budget = product.budget?.toLowerCase();
+      if (under50 && budget === '$') return true;
+      if (between50and150 && budget === '$$') return true;
+      if (over150 && budget === '$$$') return true;
+      return false;
+    });
+  }
+
+  // Apply availability filters
+  const { inStock, outOfStock } = filters.availability;
+  if (inStock || outOfStock) {
+    filtered = filtered.filter(product => {
+      if (inStock && product.isInStock === true) return true;
+      if (outOfStock && product.isInStock === false) return true;
+      return false;
+    });
+  }
+
+  // Apply on sale filter
+  if (filters.onSale) {
+    filtered = filtered.filter(product => product.isOnSale === true);
+  }
+
+  // Apply best seller filter
+  if (filters.bestSeller) {
+    filtered = filtered.filter(product => product.isBestSeller === true);
+  }
+
+  return filtered;
+};export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -45,6 +104,26 @@ export default function Catalog() {
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
+
+  // Filter states
+  const [filters, setFilters] = useState({
+    productType: {
+      keyboards: false,
+      switches: false,
+      keycaps: false,
+    },
+    budget: {
+      under50: false,
+      between50and150: false,
+      over150: false,
+    },
+    availability: {
+      inStock: false,
+      outOfStock: false,
+    },
+    onSale: false,
+    bestSeller: false,
+  });
 
   // Multi-step modal states
   const [currentStep, setCurrentStep] = useState(1);
@@ -360,66 +439,31 @@ export default function Catalog() {
         onSearchChange={setSearchQuery}
         onSearchSubmit={() => setSubmittedQuery(searchQuery)}
       />
-      <div className="mx-12">
-        <FilterPanel />
-        <FilterBreadcrumbs />
-
-        {/* Search Breadcrumbs */}
-        {submittedQuery.trim() ? (
-          <div className="mb-6 flex justify-between items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-4">
-            <div>
-              <span className="text-gray-500">Search results for: </span>
-              <span className="font-medium text-white bg-black px-3 py-1 rounded-full">
-                "{submittedQuery}"
-              </span>
-              {/* <span className="text-gray-400 mx-2">•</span>
-              <span className="text-gray-500">
-                {(() => {
-                  const searchTerm = submittedQuery.trim().toLowerCase();
-                  const filteredProducts = products.filter(
-                    (product) =>
-                      product.productName.toLowerCase().includes(searchTerm) ||
-                      product.productCategory
-                        .toLowerCase()
-                        .includes(searchTerm) ||
-                      product.switchType?.toLowerCase().includes(searchTerm) ||
-                      product.keyboardProfile
-                        ?.toLowerCase()
-                        .includes(searchTerm)
-                  );
-                  const count = filteredProducts.length;
-                  return count === 0
-                    ? "No products found"
-                    : count === 1
-                    ? "1 product found"
-                    : `${count} products found`;
-                })()}
-              </span> */}
-            </div>
-            <div>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setSubmittedQuery("");
-                }}
-                className="ml-2 text-blue-600 hover:text-blue-800 underline font-medium"
-              >
-                Clear search
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mb-6 flex items-center gap-2 text-sm text-gray-600 bg-gray-100 rounded-lg p-4">
-            <span className="font-medium text-black">
-              Showing all products
-            </span>
-            <span className="text-gray-400 mx-2">•</span>
-            <span className="text-gray-500">
-              {products.length} {products.length === 1 ? "product" : "products"}{" "}
-              available
-            </span>
-          </div>
-        )}
+      <div className="mx-12 mt-12">
+        <FilterPanel 
+          filters={filters}
+          onFiltersChange={setFilters}
+        />
+        <FilterBreadcrumbs 
+          filters={filters}
+          onFiltersChange={setFilters}
+          onClearAllFilters={() => {
+            setFilters({
+              productType: { keyboards: false, switches: false, keycaps: false },
+              budget: { under50: false, between50and150: false, over150: false },
+              availability: { inStock: false, outOfStock: false },
+              onSale: false,
+              bestSeller: false,
+            });
+            setSubmittedQuery('');
+            setSearchQuery('');
+          }}
+          searchQuery={submittedQuery}
+          onClearSearch={() => {
+            setSubmittedQuery('');
+            setSearchQuery('');
+          }}
+        />
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -427,29 +471,26 @@ export default function Catalog() {
             <ProductSkeleton count={8} />
           ) : (
             (() => {
-              const searchTerm = submittedQuery.trim().toLowerCase();
-              const filteredProducts = searchTerm
-                ? products.filter(
-                    (product) =>
-                      product.productName.toLowerCase().includes(searchTerm) ||
-                      product.productCategory
-                        .toLowerCase()
-                        .includes(searchTerm) ||
-                      product.switchType?.toLowerCase().includes(searchTerm) ||
-                      product.keyboardProfile
-                        ?.toLowerCase()
-                        .includes(searchTerm)
-                  )
-                : products;
-              if (filteredProducts.length === 0 && searchTerm) {
+              const filteredProducts = applyFilters(products, submittedQuery, filters);
+              
+              if (filteredProducts.length === 0) {
+                const hasSearch = submittedQuery.trim();
+                const hasFilters = Object.values(filters.productType).some(v => v) || 
+                                 Object.values(filters.budget).some(v => v) ||
+                                 Object.values(filters.availability).some(v => v) ||
+                                 filters.onSale ||
+                                 filters.bestSeller;
+                
                 return (
                   <div className="col-span-full text-center py-12">
                     <div className="text-gray-600 text-xl mb-2">
-                      No products found for "{submittedQuery}"
+                      No products found
                     </div>
                     <div className="text-gray-400 text-sm">
-                      Try different keywords or clear the search to see all
-                      products
+                      {hasSearch || hasFilters 
+                        ? "Try adjusting your search or filters to see more products"
+                        : "No products available at the moment"
+                      }
                     </div>
                   </div>
                 );
