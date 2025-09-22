@@ -19,39 +19,44 @@ const sortProductsByPriority = (products: Product[]): Product[] => {
     // Calculate priority scores (higher = shown first)
     const scoreA = (a.isBestSeller ? 2 : 0) + (a.isOnSale ? 1 : 0);
     const scoreB = (b.isBestSeller ? 2 : 0) + (b.isOnSale ? 1 : 0);
-    
+
     // Sort by priority score (descending), then by name (ascending) for consistency
     if (scoreA !== scoreB) {
       return scoreB - scoreA;
     }
-    
+
     // If same priority, sort alphabetically by product name
     return a.productName.localeCompare(b.productName);
   });
 };
 
 // Filter products based on active filters
-const applyFilters = (products: Product[], searchQuery: string, filters: any): Product[] => {
+const applyFilters = (
+  products: Product[],
+  searchQuery: string,
+  filters: any
+): Product[] => {
   let filtered = [...products];
 
   // Apply search filter
-  if (searchQuery && typeof searchQuery === 'string' && searchQuery.trim()) {
+  if (searchQuery && typeof searchQuery === "string" && searchQuery.trim()) {
     const searchTerm = searchQuery.trim().toLowerCase();
-    filtered = filtered.filter(product =>
-      product.productName.toLowerCase().includes(searchTerm) ||
-      product.productCategory.toLowerCase().includes(searchTerm) ||
-      (product.switchType?.toLowerCase().includes(searchTerm))
+    filtered = filtered.filter(
+      (product) =>
+        product.productName.toLowerCase().includes(searchTerm) ||
+        product.productCategory.toLowerCase().includes(searchTerm) ||
+        product.switchType?.toLowerCase().includes(searchTerm)
     );
   }
 
   // Apply product type filters
   const { keyboards, switches, keycaps } = filters.productType;
   if (keyboards || switches || keycaps) {
-    filtered = filtered.filter(product => {
+    filtered = filtered.filter((product) => {
       const category = product.productCategory.toLowerCase();
-      if (keyboards && category.includes('keyboard')) return true;
-      if (switches && category.includes('switch')) return true;
-      if (keycaps && category.includes('keycap')) return true;
+      if (keyboards && category.includes("keyboard")) return true;
+      if (switches && category.includes("switch")) return true;
+      if (keycaps && category.includes("keycap")) return true;
       return false;
     });
   }
@@ -59,11 +64,11 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
   // Apply budget filters
   const { under50, between50and150, over150 } = filters.budget;
   if (under50 || between50and150 || over150) {
-    filtered = filtered.filter(product => {
+    filtered = filtered.filter((product) => {
       const budget = product.budget?.toLowerCase();
-      if (under50 && budget === '$') return true;
-      if (between50and150 && budget === '$$') return true;
-      if (over150 && budget === '$$$') return true;
+      if (under50 && budget === "$") return true;
+      if (between50and150 && budget === "$$") return true;
+      if (over150 && budget === "$$$") return true;
       return false;
     });
   }
@@ -71,7 +76,7 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
   // Apply availability filters
   const { inStock, outOfStock } = filters.availability;
   if (inStock || outOfStock) {
-    filtered = filtered.filter(product => {
+    filtered = filtered.filter((product) => {
       if (inStock && product.isInStock === true) return true;
       if (outOfStock && product.isInStock === false) return true;
       return false;
@@ -80,16 +85,17 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
 
   // Apply on sale filter
   if (filters.onSale) {
-    filtered = filtered.filter(product => product.isOnSale === true);
+    filtered = filtered.filter((product) => product.isOnSale === true);
   }
 
   // Apply best seller filter
   if (filters.bestSeller) {
-    filtered = filtered.filter(product => product.isBestSeller === true);
+    filtered = filtered.filter((product) => product.isBestSeller === true);
   }
 
   return filtered;
-};export default function Catalog() {
+};
+export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -353,6 +359,9 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
     if (deliveryOption === "delivery") {
       prompt += `Delivery via Maxim/Grab to: ${deliveryAddress}\n`;
       prompt += `Delivery Fee: To be calculated and confirmed\n\n`;
+    } else if (deliveryOption === "shipping") {
+      prompt += `Domestic shipping via J&T to: ${deliveryAddress}\n`;
+      prompt += `Shipping Fee: To be calculated and confirmed\n\n`;
     } else {
       prompt += `Pickup (Near UM Matina only)\n`;
       prompt += `Delivery Fee: Free (Pickup)\n\n`;
@@ -441,28 +450,33 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
         onSearchSubmit={() => setSubmittedQuery(searchQuery)}
       />
       <div className="mx-12 mt-12">
-        <FilterPanel 
-          filters={filters}
-          onFiltersChange={setFilters}
-        />
-        <FilterBreadcrumbs 
+        <FilterPanel filters={filters} onFiltersChange={setFilters} />
+        <FilterBreadcrumbs
           filters={filters}
           onFiltersChange={setFilters}
           onClearAllFilters={() => {
             setFilters({
-              productType: { keyboards: false, switches: false, keycaps: false },
-              budget: { under50: false, between50and150: false, over150: false },
+              productType: {
+                keyboards: false,
+                switches: false,
+                keycaps: false,
+              },
+              budget: {
+                under50: false,
+                between50and150: false,
+                over150: false,
+              },
               availability: { inStock: false, outOfStock: false },
               onSale: false,
               bestSeller: false,
             });
-            setSubmittedQuery('');
-            setSearchQuery('');
+            setSubmittedQuery("");
+            setSearchQuery("");
           }}
           searchQuery={submittedQuery}
           onClearSearch={() => {
-            setSubmittedQuery('');
-            setSearchQuery('');
+            setSubmittedQuery("");
+            setSearchQuery("");
           }}
         />
 
@@ -472,26 +486,30 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
             <ProductSkeleton count={8} />
           ) : (
             (() => {
-              const filteredProducts = applyFilters(products, submittedQuery, filters);
-              
+              const filteredProducts = applyFilters(
+                products,
+                submittedQuery,
+                filters
+              );
+
               if (filteredProducts.length === 0) {
                 const hasSearch = submittedQuery.trim();
-                const hasFilters = Object.values(filters.productType).some(v => v) || 
-                                 Object.values(filters.budget).some(v => v) ||
-                                 Object.values(filters.availability).some(v => v) ||
-                                 filters.onSale ||
-                                 filters.bestSeller;
-                
+                const hasFilters =
+                  Object.values(filters.productType).some((v) => v) ||
+                  Object.values(filters.budget).some((v) => v) ||
+                  Object.values(filters.availability).some((v) => v) ||
+                  filters.onSale ||
+                  filters.bestSeller;
+
                 return (
                   <div className="col-span-full text-center py-12">
                     <div className="text-gray-600 text-xl mb-2">
                       No products found
                     </div>
                     <div className="text-gray-400 text-sm">
-                      {hasSearch || hasFilters 
+                      {hasSearch || hasFilters
                         ? "Try adjusting your search or filters to see more products"
-                        : "No products available at the moment"
-                      }
+                        : "No products available at the moment"}
                     </div>
                   </div>
                 );
@@ -1027,8 +1045,8 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                                 </p>
                                 <p className="text-sm text-blue-800 mt-1">
                                   {deliveryOption === "delivery"
-                                    ? "The delivery fee via Maxim/Grab will be calculated based on your location within Davao City and communicated after we receive your order details and payment screenshot."
-                                    : "The shipping fee via J&T will be calculated based on your location within the Philippines and communicated after we receive your order details and payment screenshot."}
+                                    ? "Available for Davao City only. Delivery fee will be calculated and communicated after we receive your order and payment screenshot."
+                                    : "Available nationwide in the Philippines. Shipping fee will be calculated and communicated after we receive your order and payment screenshot."}
                                 </p>
                               </div>
                             </div>
@@ -1092,7 +1110,8 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                               Delivery Fee:
                             </span>
                             <span className="text-sm text-gray-600">
-                              {deliveryOption === "delivery"
+                              {deliveryOption === "delivery" ||
+                              deliveryOption === "shipping"
                                 ? "To be calculated"
                                 : "Free (Pickup)"}
                             </span>
@@ -1103,7 +1122,8 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                                 Total Amount:
                               </span>
                               <span className="text-base font-semibold text-gray-900">
-                                {deliveryOption === "delivery"
+                                {deliveryOption === "delivery" ||
+                                deliveryOption === "shipping"
                                   ? `₱${totalAmount}`
                                   : `₱${
                                       totalAmount > 0
@@ -1286,7 +1306,8 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                                 Total:
                               </span>
                               <span className="text-base font-semibold text-gray-900">
-                                {deliveryOption === "delivery"
+                                {deliveryOption === "delivery" ||
+                                deliveryOption === "shipping"
                                   ? `₱${totalAmount}`
                                   : `₱${
                                       totalAmount > 0
@@ -1761,10 +1782,10 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                     {deliveryOption === "delivery" && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <div className="flex items-start gap-2">
-                          <span className="text-blue-600">🚗</span>
+                          <span className="text-blue-600">ℹ️</span>
                           <div>
                             <p className="text-xs font-medium text-blue-900">
-                              Delivery via Maxim/Grab
+                              Delivery Fee Calculation
                             </p>
                             <p className="text-xs text-blue-800 mt-1">
                               Available for Davao City only. Delivery fee will
@@ -1777,14 +1798,14 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                     )}
 
                     {deliveryOption === "shipping" && (
-                      <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <div className="flex items-start gap-2">
-                          <span className="text-green-600">📦</span>
+                          <span className="text-blue-600">ℹ️</span>
                           <div>
-                            <p className="text-xs font-medium text-green-900">
-                              Shipping via J&T
+                            <p className="text-xs font-medium text-blue-900">
+                              Delivery Fee Calculation
                             </p>
-                            <p className="text-xs text-green-800 mt-1">
+                            <p className="text-xs text-blue-800 mt-1">
                               Available nationwide in the Philippines. Shipping
                               fee will be calculated and communicated after we
                               receive your order and payment screenshot.
@@ -1844,7 +1865,8 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                           Delivery Fee:
                         </span>
                         <span className="text-xs text-gray-600">
-                          {deliveryOption === "delivery"
+                          {deliveryOption === "delivery" ||
+                          deliveryOption === "shipping"
                             ? "To be calculated"
                             : "Free (Pickup)"}
                         </span>
@@ -1855,7 +1877,8 @@ const applyFilters = (products: Product[], searchQuery: string, filters: any): P
                             Total:
                           </span>
                           <span className="text-base font-semibold text-gray-900">
-                            {deliveryOption === "delivery"
+                            {deliveryOption === "delivery" ||
+                            deliveryOption === "shipping"
                               ? `₱${totalAmount}`
                               : `₱${
                                   totalAmount > 0

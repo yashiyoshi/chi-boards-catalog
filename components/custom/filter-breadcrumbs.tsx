@@ -36,9 +36,9 @@ const FILTER_LABELS: Record<string, string> = {
   "productType.switches": "Switches",
   "productType.keycaps": "Keycaps",
   // Budget
-  "budget.under50": "Under $50",
-  "budget.between50and150": "$50 - $150",
-  "budget.over150": "Over $150",
+  "budget.under50": "$ - Budget",
+  "budget.between50and150": "$$ - Midrange",
+  "budget.over150": "$$$ - Enthusiast",
   // Availability
   "availability.inStock": "In Stock",
   "availability.outOfStock": "Out of Stock",
@@ -162,49 +162,51 @@ export default function FilterBreadcrumbs({
   }
 
   return (
-    <div className="flex items-center flex-wrap gap-2 mb-6 p-4 bg-gray-50 rounded-lg">
-      <span className="text-sm font-semibold text-gray-700 mr-2">Active:</span>
+    <div className="flex items-center justify-between mb-6 p-4 bg-gray-50 rounded-lg">
+      <div className="flex items-center flex-wrap gap-2">
+        <span className="text-sm font-semibold text-gray-700 mr-2">Active:</span>
 
-      {/* Search Query Badge */}
-      {hasSearch && (
-        <Badge
-          variant="secondary"
-          className="bg-black text-white hover:bg-gray-800"
-        >
-          Search: "{searchQuery}"
-          <button
-            onClick={onClearSearch}
-            className="ml-2 hover:bg-gray-700 rounded-full p-0.5"
+        {/* Search Query Badge */}
+        {hasSearch && (
+          <Badge
+            variant="secondary"
+            className="bg-black text-white hover:bg-gray-800"
           >
-            <X className="h-3 w-3" />
-          </button>
-        </Badge>
-      )}
+            Search: "{searchQuery}"
+            <button
+              onClick={onClearSearch}
+              className="ml-2 hover:bg-gray-700 rounded-full p-0.5"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        )}
 
-      {/* Filter Badges */}
-      {activeFilters.map((filter) => (
-        <Badge
-          key={filter.key}
-          variant="outline"
-          className="bg-white border-gray-300"
-        >
-          {filter.label}
-          <button
-            onClick={() => clearFilter(filter.path)}
-            className="ml-2 hover:bg-gray-100 rounded-full p-0.5"
+        {/* Filter Badges */}
+        {activeFilters.map((filter) => (
+          <Badge
+            key={filter.key}
+            variant="outline"
+            className="bg-white border-gray-300"
           >
-            <X className="h-3 w-3" />
-          </button>
-        </Badge>
-      ))}
+            {filter.label}
+            <button
+              onClick={() => clearFilter(filter.path)}
+              className="ml-2 hover:bg-gray-100 rounded-full p-0.5"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        ))}
+      </div>
 
-      {/* Clear All Button */}
+      {/* Clear All Button - Right Side */}
       {(hasSearch || hasFilters) && (
         <Button
           variant="ghost"
           size="sm"
           onClick={clearAllFilters}
-          className="text-gray-600 hover:text-gray-800 text-xs"
+          className="text-gray-600 hover:text-gray-800 text-xs ml-4"
         >
           Clear All
         </Button>
