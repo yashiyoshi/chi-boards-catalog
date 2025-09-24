@@ -141,7 +141,7 @@ export default function ProductCard({
           <div
             className={`text-sm transition-colors duration-200 ${
               !isLoadingDetails && hasSheetData && !isInStock
-                ? "text-red-500 animate-pulse"
+                ? "text-red-500"
                 : "text-gray-500"
             }`}
           >
