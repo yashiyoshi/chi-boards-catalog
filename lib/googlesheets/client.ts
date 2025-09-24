@@ -2,19 +2,64 @@ import { google } from 'googleapis';
 
 // The scope for reading and writing to Google Sheets
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
-// Path to your service account key file
-// IMPORTANT: Replace with the actual path to your key file
-const KEY_FILE_PATH = 'keyfile.json';
 
 export async function getSheetsClient() {
-  const auth = new google.auth.GoogleAuth({
-    keyFile: KEY_FILE_PATH,
-    scopes: SCOPES,
-  });
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  
+  if (!privateKey || !clientEmail) {
+    console.error('Missing Google service account credentials:', {
+      hasPrivateKey: !!privateKey,
+      hasClientEmail: !!clientEmail
+    });
+    throw new Error('Missing Google service account credentials');
+  }
 
-  const sheets = google.sheets({ version: 'v4', auth });
+  console.log('Attempting to authenticate with Google API...');
+  
+  try {
+    // Process the private key to ensure proper formatting
+    let processedPrivateKey = privateKey;
+    
+    // Handle different ways the private key might be stored
+    if (privateKey.includes('\\n')) {
+      // If stored with literal \n, replace with actual newlines
+      processedPrivateKey = privateKey.replace(/\\n/g, '\n');
+    }
+    
+    // Remove any quotes that might wrap the key
+    processedPrivateKey = processedPrivateKey.replace(/^"|"$/g, '');
+    
+    // Ensure the key starts and ends properly
+    if (!processedPrivateKey.startsWith('-----BEGIN PRIVATE KEY-----')) {
+      throw new Error('Invalid private key format: missing BEGIN marker');
+    }
+    
+    if (!processedPrivateKey.endsWith('-----END PRIVATE KEY-----')) {
+      throw new Error('Invalid private key format: missing END marker');
+    }
 
-  return sheets;
+    console.log('Private key format validated successfully');
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        type: "service_account",
+        project_id: "chi-boards-product-catalog",
+        client_email: clientEmail,
+        private_key: processedPrivateKey,
+        client_id: "102884918149289299655",
+      },
+      scopes: SCOPES,
+    });
+
+    const sheets = google.sheets({ version: 'v4', auth });
+    
+    console.log('Google Sheets client created successfully');
+    return sheets;
+  } catch (error) {
+    console.error('Error creating Google Sheets client:', error);
+    throw error;
+  }
 }
 
 interface GoogleSheetsProduct {
