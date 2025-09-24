@@ -562,8 +562,22 @@ export default function Catalog() {
       </footer>
 
       {isModalOpen && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-          <div className="bg-[#fcfcfcfc] p-6 md:p-8 rounded-md shadow-lg w-full max-w-sm md:max-w-4xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+          onClick={(e) => {
+            // Only close on desktop (screen width > 768px) when clicking the backdrop
+            if (e.target === e.currentTarget && window.innerWidth > 768) {
+              closeModal();
+            }
+          }}
+        >
+          <div 
+            className="bg-[#fcfcfcfc] p-6 md:p-8 rounded-md shadow-lg w-full max-w-sm md:max-w-4xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
+            onClick={(e) => {
+              // Prevent clicks inside the modal from closing it
+              e.stopPropagation();
+            }}
+          >
             <style jsx>{`
               .custom-scrollbar::-webkit-scrollbar {
                 width: 8px;
