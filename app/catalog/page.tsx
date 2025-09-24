@@ -141,6 +141,8 @@ export default function Catalog() {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [totalAmount, setTotalAmount] = useState(0);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [selectedQRImage, setSelectedQRImage] = useState("");
 
   useEffect(() => {
     const fetchProductsOptimized = async () => {
@@ -253,6 +255,10 @@ export default function Catalog() {
     setDeliveryAddress("");
     setPaymentMethod("");
     setTotalAmount(0);
+    
+    // Reset QR modal states
+    setShowQRModal(false);
+    setSelectedQRImage("");
   };
 
   const showErrorMessage = (message: string) => {
@@ -1180,30 +1186,40 @@ export default function Catalog() {
                                 BPI
                               </label>
                             </div>
+                            <div className="flex items-center space-x-3">
+                              <RadioGroupItem value="seabank" id="seabank-desktop" />
+                              <label
+                                htmlFor="seabank-desktop"
+                                className="text-sm text-gray-700 cursor-pointer"
+                              >
+                                SeaBank
+                              </label>
+                            </div>
                           </RadioGroup>
                         </div>
 
                         {paymentMethod && (
                           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                             <div className="text-center">
-                              <div className="w-48 h-48 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-4">
-                                {/* QR Code placeholder - you'll need to add actual QR codes */}
-                                <div className="text-center">
-                                  <div className="w-32 h-32 bg-gray-200 rounded mb-2 flex items-center justify-center">
-                                    <span className="text-xs text-gray-500">
-                                      QR Code
-                                    </span>
-                                  </div>
-                                  <p className="text-xs font-medium text-gray-700">
-                                    {paymentMethod.toUpperCase()} Payment
-                                  </p>
-                                </div>
+                              <div className="w-64 h-64 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-4 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                                onClick={() => {
+                                  setSelectedQRImage(`/qr_${paymentMethod}.jpg`);
+                                  setShowQRModal(true);
+                                }}>
+                                <img 
+                                  src={`/qr_${paymentMethod}.jpg`}
+                                  alt={`${paymentMethod.toUpperCase()} QR Code`}
+                                  className="w-full h-full object-contain p-3"
+                                />
                               </div>
-                              <p className="text-sm text-blue-700 font-medium">
+                              <p className="text-sm text-blue-700 font-medium mb-2">
                                 Scan this QR code to pay ₱
                                 {totalAmount > 0
                                   ? totalAmount.toLocaleString()
                                   : "Contact for pricing"}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                💡 Click QR code to enlarge for easier scanning
                               </p>
                             </div>
                           </div>
@@ -1932,30 +1948,40 @@ export default function Catalog() {
                             BPI
                           </label>
                         </div>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="seabank" id="seabank-mobile" />
+                          <label
+                            htmlFor="seabank-mobile"
+                            className="text-sm text-gray-700 cursor-pointer"
+                          >
+                            SeaBank
+                          </label>
+                        </div>
                       </RadioGroup>
                     </div>
 
                     {paymentMethod && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <div className="text-center">
-                          <div className="w-40 h-40 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-3">
-                            {/* QR Code placeholder - you'll need to add actual QR codes */}
-                            <div className="text-center">
-                              <div className="w-28 h-28 bg-gray-200 rounded mb-2 flex items-center justify-center">
-                                <span className="text-xs text-gray-500">
-                                  QR Code
-                                </span>
-                              </div>
-                              <p className="text-xs font-medium text-gray-700">
-                                {paymentMethod.toUpperCase()}
-                              </p>
-                            </div>
+                          <div className="w-56 h-56 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-3 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                            onClick={() => {
+                              setSelectedQRImage(`/qr_${paymentMethod}.jpg`);
+                              setShowQRModal(true);
+                            }}>
+                            <img 
+                              src={`/qr_${paymentMethod}.jpg`}
+                              alt={`${paymentMethod.toUpperCase()} QR Code`}
+                              className="w-full h-full object-contain p-3"
+                            />
                           </div>
-                          <p className="text-xs text-blue-700 font-medium">
+                          <p className="text-xs text-blue-700 font-medium mb-2">
                             Scan QR code to pay ₱
                             {totalAmount > 0
                               ? totalAmount.toLocaleString()
                               : "Contact for pricing"}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            💡 Tap QR code to enlarge
                           </p>
                         </div>
                       </div>
@@ -2147,6 +2173,50 @@ export default function Catalog() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {showQRModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-[60] p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowQRModal(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+            <button
+              onClick={() => setShowQRModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {paymentMethod?.toUpperCase()} QR Code
+              </h3>
+              
+              <div className="w-80 h-80 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-4">
+                <img 
+                  src={selectedQRImage}
+                  alt={`${paymentMethod?.toUpperCase()} QR Code`}
+                  className="w-full h-full object-contain p-4"
+                />
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-2">
+                📱 Hold your phone close to scan this QR code
+              </p>
+              <p className="text-xs text-gray-500">
+                Amount: ₱{totalAmount > 0 ? totalAmount.toLocaleString() : "Contact for pricing"}
+              </p>
             </div>
           </div>
         </div>
