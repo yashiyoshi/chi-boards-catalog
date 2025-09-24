@@ -56,12 +56,12 @@ export default function ProductCard({
 
   return (
     <div
-      className={`rounded-md overflow-hidden w-full max-w-sm mx-auto border-2 p-4 ${
+      className={`group rounded-md overflow-hidden w-full max-w-sm mx-auto border-2 p-4 transform transition-all duration-300 ease-in-out ${
         isLoadingDetails || !hasSheetData
-          ? "bg-[#F8F8F8] cursor-pointer hover:shadow-md transition-shadow"
+          ? "bg-[#F8F8F8] cursor-pointer hover:shadow-lg hover:scale-105 hover:-translate-y-1"
           : isInStock
-          ? "bg-[#F8F8F8] cursor-pointer hover:shadow-md transition-shadow"
-          : "bg-gray-100 opacity-75 cursor-not-allowed"
+          ? "bg-[#F8F8F8] cursor-pointer hover:shadow-lg hover:scale-105 hover:-translate-y-1"
+          : "bg-gray-100 opacity-75 cursor-not-allowed hover:opacity-60"
       }`}
       onClick={
         isInStock || isLoadingDetails || !hasSheetData
@@ -83,7 +83,7 @@ export default function ProductCard({
           {/* On Sale Tag */}
           {product.isOnSale && (
             <div className="bg-yellow text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex flex-row gap-1 items-center">
-              <span>🔥</span>
+              <span className="animate-bounce">🔥</span>
               <span className="text-black">On Sale</span>
             </div>
           )}
@@ -101,8 +101,8 @@ export default function ProductCard({
           alt={product.productName}
           fill
           style={{ objectFit: "contain" }}
-          className={`p-4 transition-opacity duration-300 ${
-            imageLoaded ? "opacity-100" : "opacity-0"
+          className={`p-4 transition-all duration-500 ease-in-out ${
+            imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
           onLoad={() => setImageLoaded(true)}
           priority={false} // Lazy load images for better initial page performance
@@ -110,42 +110,46 @@ export default function ProductCard({
         />
 
         {!isInStock && imageLoaded && !isLoadingDetails && hasSheetData && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <span className="text-white font-bold">Out of Stock</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-300">
+            <span className="text-white font-bold animate-pulse">Out of Stock</span>
           </div>
         )}
       </div>
       <div className="py-2 flex flex-col justify-between bg-transparent">
         <div className="flex justify-between items-center">
           <div className="flex-1 pr-2">
-            <h3 className="text-lg font-bold text-gray-900">
+            <h3 className="text-lg font-bold text-gray-900 transition-colors duration-200 group-hover:text-blue-600">
               {product.productName}
             </h3>
             {product.productCategory === "Switches" && product.switchType && (
-              <p className="text-xs text-gray-500 font-medium">
+              <p className="text-xs text-gray-500 font-medium transition-colors duration-200">
                 {product.switchType}
               </p>
             )}
             {product.productCategory === "Keycaps" &&
               product.keyboardProfile && (
-                <p className="text-xs text-gray-500 font-medium">
+                <p className="text-xs text-gray-500 font-medium transition-colors duration-200">
                   {product.keyboardProfile}
                 </p>
               )}
           </div>
-          <p className="text-lg font-bold text-gray-900">{product.budget}</p>
+          <p className="text-lg font-bold text-gray-900 transition-all duration-200 group-hover:scale-110">
+            {product.budget}
+          </p>
         </div>
         <div className="flex justify-between items-center mt-2">
           <div
-            className={`text-sm ${
+            className={`text-sm transition-colors duration-200 ${
               !isLoadingDetails && hasSheetData && !isInStock
-                ? "text-red-500"
+                ? "text-red-500 animate-pulse"
                 : "text-gray-500"
             }`}
           >
             Stock: {stockDisplay()}
           </div>
-          <div className="text-sm text-gray-500">{priceDisplay()}/pc</div>
+          <div className="text-sm text-gray-500 transition-colors duration-200">
+            {priceDisplay()}/pc
+          </div>
         </div>
       </div>
     </div>

@@ -2,8 +2,8 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 
 export const metadata = {
-  title: `Chi Boards: Product Catalog`,
-  description: `A product catalog for Chi Boards`,
+  title: "Chi Boards",
+  description: "A product catalog for Chi Boards",
 };
 
 const inter = Inter({

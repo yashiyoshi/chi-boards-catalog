@@ -2,6 +2,11 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import Banner from "@/public/main-banner-white.png";
+
+export const metadata = {
+  title: "Chi Boards",
+  description: "Chi Boards - Premium Mechanical Keyboard Products",
+};
 export default async function Page() {
   return (
     <div
