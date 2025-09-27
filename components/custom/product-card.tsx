@@ -49,7 +49,12 @@ export default function ProductCard({
       );
     }
     if (price > 0) {
-      return `₱${price}`;
+      // Format price with thousand separators and 2 decimal places
+      const formattedPrice = price.toLocaleString('en-PH', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      return `₱${formattedPrice}`;
     }
     return "Contact for price";
   };
