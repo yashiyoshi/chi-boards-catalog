@@ -88,7 +88,7 @@ export default function ProductCard({
           {/* On Sale Tag */}
           {product.isOnSale && (
             <div className="bg-yellow text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex flex-row gap-1 items-center">
-              <span className="animate-bounce">🔥</span>
+              <span>🔥</span>
               <span className="text-black">On Sale</span>
             </div>
           )}
@@ -152,7 +152,9 @@ export default function ProductCard({
           >
             Stock: {stockDisplay()}
           </div>
-          <div className="text-sm text-gray-500 transition-colors duration-200">
+          <div className={`text-sm transition-colors duration-200 ${
+            product.isOnSale ? "text-red-600 font-bold" : "text-gray-500"
+          }`}>
             {priceDisplay()}/pc
           </div>
         </div>
