@@ -549,7 +549,7 @@ export default function Catalog() {
           className="absolute z-20"
           style={{
             top: "2vw",
-            right: "8vw",
+            right: "6vw",
           }}
         >
           <p
@@ -558,11 +558,22 @@ export default function Catalog() {
           >
             CHI BOARDS
           </p>
+          <p
+            className="text-white opacity-90 mt-1 leading-relaxed text-right hidden xl:block"
+            style={{ 
+              fontSize: "0.9vw", 
+              fontFamily: "Inter, sans-serif",
+              maxWidth: "25vw",
+              marginLeft: "auto"
+            }}
+          >
+            Modern e-commerce platform crafted with Next.js, TypeScript, Contentful CMS, Google Sheets API, and innovative design.
+          </p>
         </div>
 
         {/* Copyright notice - bottom right */}
         <div 
-          className="absolute z-20 flex flex-row items-end gap-14"
+          className="absolute z-20 flex-row items-end gap-14 hidden xl:flex"
           style={{
             bottom: "2vw",
             right: "1.5vw",
@@ -574,9 +585,16 @@ export default function Catalog() {
               fontSize: "0.85vw"
             }}
           >
-            © Chi Boards by
-            <span className="text-yellow"> Yassir Utara</span>
-            <span className="text-yellow-400">. Let's make something together</span>
+            © Chi Boards by {" "}
+            <a 
+              href="https://www.yassirutara.tech/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-yellow hover:underline transition-all duration-200 cursor-pointer select-text"
+            >
+              Yassir Utara
+            </a>
+            <span className="">. Let's make something together</span>
           </p>
           
           {/* Social Media Icons */}
