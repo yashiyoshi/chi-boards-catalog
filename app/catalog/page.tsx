@@ -1219,7 +1219,7 @@ export default function Catalog() {
                                   : "Contact for pricing"}
                               </p>
                               <p className="text-xs text-gray-600">
-                                💡 Click QR code to enlarge for easier scanning
+                                Click QR code to enlarge for easier scanning
                               </p>
                             </div>
                           </div>
@@ -2211,12 +2211,31 @@ export default function Catalog() {
                 />
               </div>
               
-              <p className="text-sm text-gray-600 mb-2">
-                📱 Hold your phone close to scan this QR code
+              <p className="text-sm text-gray-700 mb-2">
+                Hold your phone close to scan this QR code
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 mb-4">
                 Amount: ₱{totalAmount > 0 ? totalAmount.toLocaleString() : "Contact for pricing"}
               </p>
+              
+              {/* Download Button */}
+              <button
+                onClick={() => {
+                  // Create a temporary link element to trigger download
+                  const link = document.createElement('a');
+                  link.href = selectedQRImage;
+                  link.download = `chi-boards-${paymentMethod}-qr-code.jpg`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 mx-auto"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Save QR Code
+              </button>
             </div>
           </div>
         </div>
