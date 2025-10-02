@@ -601,7 +601,7 @@ export default function Catalog() {
             </a>
             
             <a
-              href="https://www.instagram.com/chiboards"
+              href="https://www.instagram.com/chiboards.dvo"
               target="_blank"
               rel="noopener noreferrer"
               className="text-white opacity-80 hover:opacity-100 hover:text-pink-400 transition-all duration-200"
