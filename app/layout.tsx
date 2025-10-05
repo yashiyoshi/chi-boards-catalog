@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
   title: "Chi Boards",
@@ -24,6 +25,7 @@ export default function RootLayout({
         <section className="flex-grow">
           <main>{children}</main>
         </section>
+        <SpeedInsights />
       </body>
     </html>
   );
