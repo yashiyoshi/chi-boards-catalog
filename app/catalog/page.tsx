@@ -255,7 +255,7 @@ export default function Catalog() {
     setDeliveryAddress("");
     setPaymentMethod("");
     setTotalAmount(0);
-    
+
     // Reset QR modal states
     setShowQRModal(false);
     setSelectedQRImage("");
@@ -332,6 +332,10 @@ export default function Catalog() {
       }
       if (deliveryOption === "delivery" && !deliveryAddress.trim()) {
         showErrorMessage("Please enter your delivery address");
+        return;
+      }
+      if (deliveryOption === "shipping" && !deliveryAddress.trim()) {
+        showErrorMessage("Please enter your shipping address");
         return;
       }
     } else if (currentStep === 4) {
@@ -560,35 +564,36 @@ export default function Catalog() {
           </p>
           <p
             className="text-white opacity-90 mt-1 leading-relaxed text-right hidden xl:block"
-            style={{ 
-              fontSize: "0.9vw", 
+            style={{
+              fontSize: "0.9vw",
               fontFamily: "Inter, sans-serif",
               maxWidth: "25vw",
-              marginLeft: "auto"
+              marginLeft: "auto",
             }}
           >
-            Modern e-commerce platform crafted with Next.js, TypeScript, Contentful CMS, Google Sheets API, and innovative design.
+            Modern e-commerce platform crafted with Next.js, TypeScript,
+            Contentful CMS, Google Sheets API, and innovative design.
           </p>
         </div>
 
         {/* Copyright notice - bottom right */}
-        <div 
+        <div
           className="absolute z-20 flex-row items-end gap-14 hidden xl:flex"
           style={{
             bottom: "2vw",
             right: "1.5vw",
           }}
         >
-          <p 
+          <p
             className="text-white opacity-80 text-right leading-tight"
-            style={{ 
-              fontSize: "0.85vw"
+            style={{
+              fontSize: "0.85vw",
             }}
           >
-            © Chi Boards by {" "}
-            <a 
-              href="https://www.yassirutara.tech/" 
-              target="_blank" 
+            © Chi Boards by{" "}
+            <a
+              href="https://www.yassirutara.tech/"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-yellow hover:underline transition-all duration-200 cursor-pointer select-text"
             >
@@ -596,7 +601,7 @@ export default function Catalog() {
             </a>
             <span className="">. Let's make something together</span>
           </p>
-          
+
           {/* Social Media Icons */}
           <div className="lg:flex gap-4 hidden">
             <a
@@ -604,36 +609,44 @@ export default function Catalog() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-white opacity-80 hover:opacity-100 hover:text-blue-400 transition-all duration-200"
-              style={{ 
-                width: "1vw", 
+              style={{
+                width: "1vw",
                 height: "1vw",
                 minWidth: "12px",
                 minHeight: "12px",
                 maxWidth: "20px",
-                maxHeight: "20px"
+                maxHeight: "20px",
               }}
             >
-              <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              <svg
+                className="w-full h-full"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
             </a>
-            
+
             <a
               href="https://www.instagram.com/chiboards.dvo"
               target="_blank"
               rel="noopener noreferrer"
               className="text-white opacity-80 hover:opacity-100 hover:text-pink-400 transition-all duration-200"
-              style={{ 
-                width: "1vw", 
+              style={{
+                width: "1vw",
                 height: "1vw",
                 minWidth: "12px",
                 minHeight: "12px",
                 maxWidth: "20px",
-                maxHeight: "20px"
+                maxHeight: "20px",
               }}
             >
-              <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              <svg
+                className="w-full h-full"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
               </svg>
             </a>
           </div>
@@ -647,7 +660,7 @@ export default function Catalog() {
       </footer>
 
       {isModalOpen && selectedProduct && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
           onClick={(e) => {
             // Only close on desktop (screen width > 768px) when clicking the backdrop
@@ -656,7 +669,7 @@ export default function Catalog() {
             }
           }}
         >
-          <div 
+          <div
             className="bg-[#fcfcfcfc] p-6 md:p-8 rounded-md shadow-lg w-full max-w-sm md:max-w-4xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
             onClick={(e) => {
               // Prevent clicks inside the modal from closing it
@@ -1266,7 +1279,10 @@ export default function Catalog() {
                               </label>
                             </div>
                             <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="seabank" id="seabank-desktop" />
+                              <RadioGroupItem
+                                value="seabank"
+                                id="seabank-desktop"
+                              />
                               <label
                                 htmlFor="seabank-desktop"
                                 className="text-sm text-gray-700 cursor-pointer"
@@ -1276,16 +1292,39 @@ export default function Catalog() {
                             </div>
                           </RadioGroup>
                         </div>
-
+                        {/* Important Payment Screenshot Reminder */}
+                        {paymentMethod && (
+                          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <div className="flex items-start gap-2">
+                              <span className="text-yellow-600 text-lg">
+                                📸
+                              </span>
+                              <div>
+                                <p className="text-sm font-medium text-yellow-900">
+                                  IMPORTANT: Take a Screenshot!
+                                </p>
+                                <p className="text-sm text-yellow-800 mt-1">
+                                  Make sure to take a screenshot of the receipt
+                                  in your chosen method of payment. You'll need
+                                  to send this along with your order details later.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         {paymentMethod && (
                           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                             <div className="text-center">
-                              <div className="w-64 h-64 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-4 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                              <div
+                                className="w-64 h-64 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-4 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
                                 onClick={() => {
-                                  setSelectedQRImage(`/qr_${paymentMethod}.jpg`);
+                                  setSelectedQRImage(
+                                    `/qr_${paymentMethod}.jpg`
+                                  );
                                   setShowQRModal(true);
-                                }}>
-                                <img 
+                                }}
+                              >
+                                <img
                                   src={`/qr_${paymentMethod}.jpg`}
                                   alt={`${paymentMethod.toUpperCase()} QR Code`}
                                   className="w-full h-full object-contain p-3"
@@ -2042,12 +2081,14 @@ export default function Catalog() {
                     {paymentMethod && (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <div className="text-center">
-                          <div className="w-56 h-56 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-3 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                          <div
+                            className="w-56 h-56 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center mb-3 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
                             onClick={() => {
                               setSelectedQRImage(`/qr_${paymentMethod}.jpg`);
                               setShowQRModal(true);
-                            }}>
-                            <img 
+                            }}
+                          >
+                            <img
                               src={`/qr_${paymentMethod}.jpg`}
                               alt={`${paymentMethod.toUpperCase()} QR Code`}
                               className="w-full h-full object-contain p-3"
@@ -2259,7 +2300,7 @@ export default function Catalog() {
 
       {/* QR Code Modal */}
       {showQRModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-[60] p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -2272,36 +2313,49 @@ export default function Catalog() {
               onClick={() => setShowQRModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
-            
+
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {paymentMethod?.toUpperCase()} QR Code
               </h3>
-              
+
               <div className="w-80 h-80 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-4">
-                <img 
+                <img
                   src={selectedQRImage}
                   alt={`${paymentMethod?.toUpperCase()} QR Code`}
                   className="w-full h-full object-contain p-4"
                 />
               </div>
-              
+
               <p className="text-sm text-gray-700 mb-2">
                 Hold your phone close to scan this QR code
               </p>
               <p className="text-xs text-gray-500 mb-4">
-                Amount: ₱{totalAmount > 0 ? totalAmount.toLocaleString() : "Contact for pricing"}
+                Amount: ₱
+                {totalAmount > 0
+                  ? totalAmount.toLocaleString()
+                  : "Contact for pricing"}
               </p>
-              
+
               {/* Download Button */}
               <button
                 onClick={() => {
                   // Create a temporary link element to trigger download
-                  const link = document.createElement('a');
+                  const link = document.createElement("a");
                   link.href = selectedQRImage;
                   link.download = `chi-boards-${paymentMethod}-qr-code.jpg`;
                   document.body.appendChild(link);
@@ -2310,8 +2364,18 @@ export default function Catalog() {
                 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 mx-auto"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
                 Save QR Code
               </button>
