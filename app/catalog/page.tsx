@@ -1304,9 +1304,18 @@ export default function Catalog() {
                                   IMPORTANT: Take a Screenshot!
                                 </p>
                                 <p className="text-sm text-yellow-800 mt-1">
-                                  Make sure to take a screenshot of the receipt
-                                  in your chosen method of payment. You'll need
-                                  to send this along with your order details later.
+                                  After you make the payment using your chosen
+                                  method, make sure to take a screenshot of the
+                                  payment receipt. You'll need to send this
+                                  screenshot along with your order details.
+                                </p>
+                                <p className="text-xs font-medium mt-4">
+                                  FOR DELIVERIES:
+                                </p>
+                                <p className="text-xs mt-1">
+                                  You will be making another payment for the
+                                  delivery fee once we receive the initial
+                                  payment and order details.
                                 </p>
                               </div>
                             </div>
@@ -2103,6 +2112,34 @@ export default function Catalog() {
                           <p className="text-xs text-gray-600">
                             💡 Tap QR code to enlarge
                           </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Important Payment Screenshot Reminder - Mobile */}
+                    {paymentMethod && (
+                      <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                        <div className="flex items-start gap-2">
+                          <span className="text-yellow-600 text-base">📸</span>
+                          <div>
+                            <p className="text-xs font-medium text-yellow-900">
+                              IMPORTANT: Take a Screenshot!
+                            </p>
+                            <p className="text-xs text-yellow-800 mt-1">
+                              After you make the payment using your chosen
+                              method, make sure to take a screenshot of the
+                              payment receipt. You'll need to send this
+                              screenshot along with your order details.
+                            </p>
+                            <p className="text-xs font-medium mt-4">
+                              FOR DELIVERIES:
+                            </p>
+                            <p className="text-xs mt-1">
+                              You will be making another payment for the
+                              delivery fee once we receive the initial payment
+                              and order details.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}
