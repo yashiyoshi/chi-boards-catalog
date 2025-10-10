@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
   title: "Chi Boards",
@@ -26,6 +27,7 @@ export default function RootLayout({
           <main>{children}</main>
         </section>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
