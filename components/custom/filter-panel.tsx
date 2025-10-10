@@ -207,14 +207,14 @@ export default function FilterPanel({ filters, onFiltersChange }: FilterPanelPro
               Filters
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh]">
+          <SheetContent side="bottom" className="h-[80vh] flex flex-col">
             <SheetHeader>
               <SheetTitle>Filters</SheetTitle>
               <SheetDescription>
                 Filter products by type, budget, and availability
               </SheetDescription>
             </SheetHeader>
-            <div className="py-6 space-y-6">
+            <div className="py-6 space-y-6 flex-1 overflow-y-auto">
               {/* Product Type */}
               <div>
                 <h3 className="font-semibold text-gray-900 mb-3">Product Type</h3>
@@ -323,7 +323,7 @@ export default function FilterPanel({ filters, onFiltersChange }: FilterPanelPro
                 </div>
               </div>
             </div>
-            <SheetFooter>
+            <SheetFooter className="flex-shrink-0 pt-4 border-t">
               <SheetClose asChild>
                 <Button variant="outline" className="w-full">Done</Button>
               </SheetClose>
