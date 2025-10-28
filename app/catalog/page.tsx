@@ -100,6 +100,7 @@ export default function Catalog() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [hasUserTyped, setHasUserTyped] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isPromptGenerated, setIsPromptGenerated] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -230,6 +231,7 @@ export default function Catalog() {
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
+    setHasUserTyped(false); // Reset typing flag for new product
     // Set initial quantity based on product category
     if (product.productCategory === "Switches") {
       setQuantity(5);
@@ -247,6 +249,7 @@ export default function Catalog() {
     setShowError(false);
     setErrorMessage("");
     setQuantity(1); // Reset to default quantity
+    setHasUserTyped(false); // Reset typing flag
 
     // Reset multi-step modal states
     setCurrentStep(1);
@@ -268,18 +271,23 @@ export default function Catalog() {
   };
 
   const handleBuyNow = () => {
-    // Ensure quantity is positive
-    if (quantity <= 0) {
+    // Convert quantity to number and validate
+    const numQuantity = parseInt(quantity, 10) || 0;
+    
+    if (numQuantity <= 0) {
       showErrorMessage("Quantity must be greater than 0");
       return;
     }
+    
+    // Update quantity state with validated number
+    setQuantity(numQuantity);
 
     // Validate quantity against stock if available
     if (
       selectedProduct?.hasSheetData &&
       typeof selectedProduct.stock === "number"
     ) {
-      if (quantity > selectedProduct.stock) {
+      if (numQuantity > selectedProduct.stock) {
         showErrorMessage(
           `Quantity cannot exceed available stock (${selectedProduct.stock} pieces)`
         );
@@ -288,7 +296,7 @@ export default function Catalog() {
     }
 
     // Validate increments of 5 for switches
-    if (selectedProduct?.productCategory === "Switches" && quantity % 5 !== 0) {
+    if (selectedProduct?.productCategory === "Switches" && numQuantity % 5 !== 0) {
       showErrorMessage(
         "For switches, quantity must be in increments of 5 (e.g., 5, 10, 15, 20...)"
       );
@@ -302,7 +310,7 @@ export default function Catalog() {
       selectedProduct?.price &&
       selectedProduct.price > 0
     ) {
-      calculatedTotal = quantity * selectedProduct.price;
+      calculatedTotal = numQuantity * selectedProduct.price;
     }
     setTotalAmount(calculatedTotal);
 
@@ -826,6 +834,7 @@ export default function Catalog() {
                             <button
                               type="button"
                               onClick={() => {
+                                setHasUserTyped(true); // Mark that user has interacted
                                 if (
                                   selectedProduct?.productCategory ===
                                   "Switches"
@@ -846,31 +855,62 @@ export default function Catalog() {
                               type="number"
                               placeholder="Qty"
                               className="w-20 text-center text-sm border-0 focus:ring-0"
-                              value={quantity}
+                              value={quantity || ""}
                               disabled={selectedProduct?.isLoadingDetails}
                               onChange={(e) => {
-                                const value = parseInt(e.target.value, 10);
-                                if (!isNaN(value) && value > 0) {
-                                  if (
-                                    selectedProduct?.productCategory ===
-                                    "Switches"
-                                  ) {
-                                    // For switches, round to nearest multiple of 5, minimum 5
-                                    const roundedValue = Math.max(
-                                      5,
-                                      Math.round(value / 5) * 5
-                                    );
+                                const inputValue = e.target.value;
+                                
+                                // If user hasn't typed yet and starts typing, clear the initial value
+                                if (!hasUserTyped && inputValue !== "") {
+                                  setHasUserTyped(true);
+                                  const value = parseInt(inputValue, 10);
+                                  if (!isNaN(value) && value >= 0) {
+                                    setQuantity(value);
+                                  }
+                                  return;
+                                }
+                                
+                                // Mark that user has started typing
+                                if (!hasUserTyped && inputValue !== "") {
+                                  setHasUserTyped(true);
+                                }
+                                
+                                // Allow empty input (user is deleting/clearing field)
+                                if (inputValue === "") {
+                                  setQuantity("");
+                                  return;
+                                }
+                                
+                                const value = parseInt(inputValue, 10);
+                                if (!isNaN(value) && value >= 0) {
+                                  setQuantity(value);
+                                }
+                              }}
+                              onFocus={(e) => {
+                                // If user hasn't typed yet, select all text for easy replacement
+                                if (!hasUserTyped) {
+                                  e.target.select();
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const value = parseInt(e.target.value, 10) || 0;
+                                
+                                if (selectedProduct?.productCategory === "Switches") {
+                                  if (value <= 0) {
+                                    setQuantity(5);
+                                    setHasUserTyped(false); // Reset flag if reverting to default
+                                  } else {
+                                    // Round to nearest multiple of 5, minimum 5
+                                    const roundedValue = Math.max(5, Math.round(value / 5) * 5);
                                     setQuantity(roundedValue);
+                                  }
+                                } else {
+                                  if (value <= 0) {
+                                    setQuantity(1);
+                                    setHasUserTyped(false); // Reset flag if reverting to default
                                   } else {
                                     setQuantity(value);
                                   }
-                                } else if (e.target.value === "") {
-                                  setQuantity(
-                                    selectedProduct?.productCategory ===
-                                      "Switches"
-                                      ? 5
-                                      : 1
-                                  );
                                 }
                               }}
                               min={
@@ -888,6 +928,7 @@ export default function Catalog() {
                             <button
                               type="button"
                               onClick={() => {
+                                setHasUserTyped(true); // Mark that user has interacted
                                 if (
                                   selectedProduct?.productCategory ===
                                   "Switches"
@@ -1640,6 +1681,7 @@ export default function Catalog() {
                         <button
                           type="button"
                           onClick={() => {
+                            setHasUserTyped(true); // Mark that user has interacted
                             if (
                               selectedProduct?.productCategory === "Switches"
                             ) {
@@ -1659,29 +1701,62 @@ export default function Catalog() {
                           type="number"
                           placeholder="Qty"
                           className="w-16 text-center text-sm border-0 focus:ring-0"
-                          value={quantity}
+                          value={quantity || ""}
                           disabled={selectedProduct?.isLoadingDetails}
                           onChange={(e) => {
-                            const value = parseInt(e.target.value, 10);
-                            if (!isNaN(value) && value > 0) {
-                              if (
-                                selectedProduct?.productCategory === "Switches"
-                              ) {
-                                // For switches, round to nearest multiple of 5, minimum 5
-                                const roundedValue = Math.max(
-                                  5,
-                                  Math.round(value / 5) * 5
-                                );
+                            const inputValue = e.target.value;
+                            
+                            // If user hasn't typed yet and starts typing, clear the initial value
+                            if (!hasUserTyped && inputValue !== "") {
+                              setHasUserTyped(true);
+                              const value = parseInt(inputValue, 10);
+                              if (!isNaN(value) && value >= 0) {
+                                setQuantity(value);
+                              }
+                              return;
+                            }
+                            
+                            // Mark that user has started typing
+                            if (!hasUserTyped && inputValue !== "") {
+                              setHasUserTyped(true);
+                            }
+                            
+                            // Allow empty input (user is deleting/clearing field)
+                            if (inputValue === "") {
+                              setQuantity("");
+                              return;
+                            }
+                            
+                            const value = parseInt(inputValue, 10);
+                            if (!isNaN(value) && value >= 0) {
+                              setQuantity(value);
+                            }
+                          }}
+                          onFocus={(e) => {
+                            // If user hasn't typed yet, select all text for easy replacement
+                            if (!hasUserTyped) {
+                              e.target.select();
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const value = parseInt(e.target.value, 10) || 0;
+                            
+                            if (selectedProduct?.productCategory === "Switches") {
+                              if (value <= 0) {
+                                setQuantity(5);
+                                setHasUserTyped(false); // Reset flag if reverting to default
+                              } else {
+                                // Round to nearest multiple of 5, minimum 5
+                                const roundedValue = Math.max(5, Math.round(value / 5) * 5);
                                 setQuantity(roundedValue);
+                              }
+                            } else {
+                              if (value <= 0) {
+                                setQuantity(1);
+                                setHasUserTyped(false); // Reset flag if reverting to default
                               } else {
                                 setQuantity(value);
                               }
-                            } else if (e.target.value === "") {
-                              setQuantity(
-                                selectedProduct?.productCategory === "Switches"
-                                  ? 5
-                                  : 1
-                              );
                             }
                           }}
                           min={
@@ -1699,6 +1774,7 @@ export default function Catalog() {
                         <button
                           type="button"
                           onClick={() => {
+                            setHasUserTyped(true); // Mark that user has interacted
                             if (
                               selectedProduct?.productCategory === "Switches"
                             ) {
