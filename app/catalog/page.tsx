@@ -99,7 +99,7 @@ export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number | string>(1);
   const [hasUserTyped, setHasUserTyped] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isPromptGenerated, setIsPromptGenerated] = useState(false);
@@ -272,7 +272,7 @@ export default function Catalog() {
 
   const handleBuyNow = () => {
     // Convert quantity to number and validate
-    const numQuantity = parseInt(quantity, 10) || 0;
+    const numQuantity = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
     
     if (numQuantity <= 0) {
       showErrorMessage("Quantity must be greater than 0");
@@ -839,10 +839,12 @@ export default function Catalog() {
                                   selectedProduct?.productCategory ===
                                   "Switches"
                                 ) {
-                                  const newValue = Math.max(5, quantity - 5);
+                                  const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
+                                  const newValue = Math.max(5, currentQty - 5);
                                   setQuantity(newValue);
                                 } else {
-                                  const newValue = Math.max(1, quantity - 1);
+                                  const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
+                                  const newValue = Math.max(1, currentQty - 1);
                                   setQuantity(newValue);
                                 }
                               }}
@@ -888,12 +890,6 @@ export default function Catalog() {
                                 const value = parseInt(inputValue, 10);
                                 if (!isNaN(value) && value >= 0) {
                                   setQuantity(value);
-                                }
-                              }}
-                              onFocus={(e) => {
-                                // If user hasn't typed yet, select all text for easy replacement
-                                if (!hasUserTyped) {
-                                  e.target.select();
                                 }
                               }}
                               onBlur={(e) => {
@@ -942,9 +938,10 @@ export default function Catalog() {
                                     typeof selectedProduct.stock === "number"
                                       ? selectedProduct.stock
                                       : 9999;
+                                  const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
                                   const newValue = Math.min(
                                     maxStock,
-                                    quantity + 5
+                                    currentQty + 5
                                   );
                                   setQuantity(newValue);
                                 } else {
@@ -953,9 +950,10 @@ export default function Catalog() {
                                     typeof selectedProduct.stock === "number"
                                       ? selectedProduct.stock
                                       : 9999;
+                                  const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
                                   const newValue = Math.min(
                                     maxStock,
-                                    quantity + 1
+                                    currentQty + 1
                                   );
                                   setQuantity(newValue);
                                 }
@@ -1689,10 +1687,12 @@ export default function Catalog() {
                             if (
                               selectedProduct?.productCategory === "Switches"
                             ) {
-                              const newValue = Math.max(5, quantity - 5);
+                              const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
+                              const newValue = Math.max(5, currentQty - 5);
                               setQuantity(newValue);
                             } else {
-                              const newValue = Math.max(1, quantity - 1);
+                              const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
+                              const newValue = Math.max(1, currentQty - 1);
                               setQuantity(newValue);
                             }
                           }}
@@ -1740,12 +1740,6 @@ export default function Catalog() {
                               setQuantity(value);
                             }
                           }}
-                          onFocus={(e) => {
-                            // If user hasn't typed yet, select all text for easy replacement
-                            if (!hasUserTyped) {
-                              e.target.select();
-                            }
-                          }}
                           onBlur={(e) => {
                             const value = parseInt(e.target.value, 10) || 0;
                             
@@ -1791,7 +1785,8 @@ export default function Catalog() {
                                 typeof selectedProduct.stock === "number"
                                   ? selectedProduct.stock
                                   : 9999;
-                              const newValue = Math.min(maxStock, quantity + 5);
+                              const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
+                              const newValue = Math.min(maxStock, currentQty + 5);
                               setQuantity(newValue);
                             } else {
                               const maxStock =
@@ -1799,7 +1794,8 @@ export default function Catalog() {
                                 typeof selectedProduct.stock === "number"
                                   ? selectedProduct.stock
                                   : 9999;
-                              const newValue = Math.min(maxStock, quantity + 1);
+                              const currentQty = typeof quantity === 'string' ? parseInt(quantity, 10) || 0 : quantity || 0;
+                              const newValue = Math.min(maxStock, currentQty + 1);
                               setQuantity(newValue);
                             }
                           }}
