@@ -23,8 +23,11 @@ export default function DeliveryMapPicker({ apiKey, initialLocation, onSelect }:
   const markerRef = useRef<any>(null);
   const mapInstanceRef = useRef<any>(null);
 
+  // Use provided apiKey or fall back to environment variable
+  const effectiveApiKey = apiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   useEffect(() => {
-    if (!apiKey) {
+    if (!effectiveApiKey) {
       setError("Google Maps API key not provided. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.");
       return;
     }
@@ -108,7 +111,7 @@ export default function DeliveryMapPicker({ apiKey, initialLocation, onSelect }:
     } else {
       // create script
       const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=${callbackName}`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${effectiveApiKey}&libraries=places&callback=${callbackName}`;
       script.async = true;
       (window as any)[callbackName] = () => {
         init();
@@ -122,7 +125,7 @@ export default function DeliveryMapPicker({ apiKey, initialLocation, onSelect }:
         } catch (e) {}
       };
     }
-  }, [apiKey, initialLocation, onSelect]);
+  }, [effectiveApiKey, initialLocation, onSelect]);
 
   const useMyLocation = () => {
     if (!navigator.geolocation) return setError("Geolocation not supported");
@@ -145,7 +148,7 @@ export default function DeliveryMapPicker({ apiKey, initialLocation, onSelect }:
 
   return (
     <div className="space-y-2">
-      {!apiKey ? (
+      {!effectiveApiKey ? (
         <div className="p-3 bg-yellow-50 rounded border border-yellow-200 text-sm text-yellow-800">Google Maps API key not set. Set `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` to enable inline map picker.</div>
       ) : error ? (
         <div className="p-3 bg-red-50 rounded border border-red-200 text-sm text-red-700">{error}</div>
