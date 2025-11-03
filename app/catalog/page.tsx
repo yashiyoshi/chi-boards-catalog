@@ -848,6 +848,10 @@ export default function Catalog() {
                               className="w-20 text-center text-sm border-0 focus:ring-0"
                               value={quantity}
                               disabled={selectedProduct?.isLoadingDetails}
+                              onFocus={(e) => {
+                                // Auto-select all text when user clicks the input
+                                e.target.select();
+                              }}
                               onChange={(e) => {
                                 const value = parseInt(e.target.value, 10);
                                 if (!isNaN(value) && value > 0) {
@@ -1661,6 +1665,10 @@ export default function Catalog() {
                           className="w-16 text-center text-sm border-0 focus:ring-0"
                           value={quantity}
                           disabled={selectedProduct?.isLoadingDetails}
+                          onFocus={(e) => {
+                            // Auto-select all text when user clicks the input
+                            e.target.select();
+                          }}
                           onChange={(e) => {
                             const value = parseInt(e.target.value, 10);
                             if (!isNaN(value) && value > 0) {
