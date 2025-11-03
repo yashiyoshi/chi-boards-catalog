@@ -185,7 +185,7 @@ export default function DeliveryMapPicker({
             <button
               type="button"
               onClick={useMyLocation}
-              className="px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200"
+              className="px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-200"
             >
               Use my location
             </button>
