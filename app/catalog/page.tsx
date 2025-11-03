@@ -151,12 +151,12 @@ export default function Catalog() {
     { lat: number; lng: number; address?: string } | null
   >(null);
   const [deliveryFee, setDeliveryFee] = useState(0);
+  
+  const GEOAPIFY_API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY || "";
 
-  // Pickup coordinates (config via env, fallback to UM Matina example)
-  const PICKUP_LAT = parseFloat(process.env.NEXT_PUBLIC_PICKUP_LAT || "7.0603");
-  const PICKUP_LNG = parseFloat(process.env.NEXT_PUBLIC_PICKUP_LNG || "125.6196");
-
-  const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  // Pickup coordinates (config via env, fallback to your coordinates)
+  const PICKUP_LAT = parseFloat(process.env.NEXT_PUBLIC_PICKUP_LAT || "7.064624820377347");
+  const PICKUP_LNG = parseFloat(process.env.NEXT_PUBLIC_PICKUP_LNG || "125.59898077983718");
 
   // Haversine distance in kilometers
   const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -164,23 +164,23 @@ export default function Catalog() {
     const R = 6371; // km
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + 
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
+  // Compute delivery fee using Maxim rules: 40 PHP base + 15 PHP per km (rounded up)
   const computeDeliveryFee = (lat: number, lng: number) => {
     const distance = haversineKm(PICKUP_LAT, PICKUP_LNG, lat, lng);
-    const kmCeil = Math.ceil(distance || 0);
-    const fee = 40 + kmCeil * 10;
-    return { fee, distance };
+    const fee = 40 + Math.ceil(distance) * 10;
+    return { distance, fee };
   };
 
   const handleLocationSelect = (loc: { lat: number; lng: number; address?: string }) => {
     setSelectedLocation(loc);
+    setDeliveryAddress(loc.address || "");
     const { fee } = computeDeliveryFee(loc.lat, loc.lng);
     setDeliveryFee(fee);
   };
@@ -416,7 +416,12 @@ export default function Catalog() {
     prompt += `📦 DELIVERY:\n`;
     if (deliveryOption === "delivery") {
       prompt += `Delivery via Maxim/Grab to: ${deliveryAddress}\n`;
-      prompt += `Delivery Fee: To be calculated and confirmed\n\n`;
+      if (selectedLocation) {
+        prompt += `Map Link: https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}\n`;
+        prompt += `Delivery Fee: ₱${deliveryFee}\n\n`;
+      } else {
+        prompt += `Delivery Fee: To be calculated and confirmed\n\n`;
+      }
     } else if (deliveryOption === "shipping") {
       prompt += `Domestic shipping via J&T to: ${deliveryAddress}\n`;
       prompt += `Shipping Fee: To be calculated and confirmed\n\n`;
@@ -1203,84 +1208,48 @@ export default function Catalog() {
                           </RadioGroup>
                         </div>
 
-                        {(deliveryOption === "delivery" ||
-                          deliveryOption === "shipping") && (
+                        {deliveryOption === "delivery" && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {deliveryOption === "delivery"
-                                ? "Delivery Address *"
-                                : "Shipping Address *"}
+                              Delivery Address* (Davao City)
                             </label>
                             <div>
                               <DeliveryMapPicker
-                                apiKey={GOOGLE_MAPS_API_KEY}
-                                initialLocation={
-                                  selectedLocation ?? undefined
-                                }
-                                onSelect={(loc) => {
-                                  setDeliveryAddress(loc.address || "");
-                                  handleLocationSelect(loc);
-                                }}
+                                apiKey={GEOAPIFY_API_KEY}
+                                initialLocation={selectedLocation ?? undefined}
+                                onSelect={handleLocationSelect}
+                                selectedLocation={selectedLocation}
+                                deliveryFee={deliveryFee}
                               />
-
-                              {selectedLocation && (
-                                <div className="mt-2 p-3 bg-white border rounded text-sm">
-                                  <div className="mb-1">
-                                    <strong className="mr-2">Selected:</strong>
-                                    {selectedLocation.address || `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`}
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-sm">Estimated delivery fee: <strong>₱{deliveryFee}</strong></span>
-                                    <a
-                                      className="text-sm text-blue-600 hover:underline"
-                                      href={`https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      Open in Google Maps
-                                    </a>
-                                    <button
-                                      type="button"
-                                      className="text-sm px-2 py-1 bg-gray-100 rounded"
-                                      onClick={async () => {
-                                        const url = `https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`;
-                                        try {
-                                          await navigator.clipboard.writeText(url);
-                                        } catch (e) {
-                                          // fallback
-                                          const ta = document.createElement('textarea');
-                                          ta.value = url;
-                                          document.body.appendChild(ta);
-                                          ta.select();
-                                          document.execCommand('copy');
-                                          document.body.removeChild(ta);
-                                        }
-                                      }}
-                                    >
-                                      Copy map link
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           </div>
                         )}
 
-                        {(deliveryOption === "delivery" ||
-                          deliveryOption === "shipping") && (
+                        {deliveryOption === "shipping" && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Shipping Address* (Domestic)
+                            </label>
+                            <textarea
+                              placeholder="Enter your complete address for J&T shipping"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              rows={3}
+                              value={deliveryAddress}
+                              onChange={(e) => setDeliveryAddress(e.target.value)}
+                            />
+                          </div>
+                        )}
+
+                        {deliveryOption === "shipping" && (
                           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                             <div className="flex items-start gap-2">
                               <span className="text-blue-600 text-lg">ℹ️</span>
                               <div>
                                 <p className="text-sm font-medium text-blue-900">
-                                  {deliveryOption === "delivery"
-                                    ? "Delivery Fee Calculation"
-                                    : "Shipping Fee Calculation"}
+                                  Shipping Fee Calculation
                                 </p>
                                 <p className="text-sm text-blue-800 mt-1">
-                                  {deliveryOption === "delivery"
-                                    ? "Available for Davao City only. Delivery fee will be calculated and communicated after we receive your order and payment screenshot."
-                                    : "Available nationwide in the Philippines. Shipping fee will be calculated and communicated after we receive your order and payment screenshot."}
+                                  Available nationwide in the Philippines. Shipping fee will be calculated and communicated after we receive your order and payment screenshot.
                                 </p>
                               </div>
                             </div>
@@ -1344,8 +1313,9 @@ export default function Catalog() {
                               Delivery Fee:
                             </span>
                             <span className="text-sm text-gray-600">
-                              {deliveryOption === "delivery" ||
-                              deliveryOption === "shipping"
+                              {deliveryOption === "delivery" && selectedLocation
+                                ? `₱${deliveryFee}`
+                                : deliveryOption === "shipping"
                                 ? "To be calculated"
                                 : "Free (Pickup)"}
                             </span>
@@ -1356,14 +1326,12 @@ export default function Catalog() {
                                 Total Amount:
                               </span>
                               <span className="text-base font-semibold text-gray-900">
-                                {deliveryOption === "delivery" ||
-                                deliveryOption === "shipping"
-                                  ? `₱${totalAmount}`
-                                  : `₱${
-                                      totalAmount > 0
-                                        ? totalAmount.toLocaleString()
-                                        : "Contact for pricing"
-                                    }`}
+                                {(() => {
+                                  const finalTotal = totalAmount + (deliveryOption === "delivery" && selectedLocation ? deliveryFee : 0);
+                                  return totalAmount > 0
+                                    ? `₱${finalTotal.toLocaleString()}`
+                                    : "Contact for pricing";
+                                })()}
                               </span>
                             </div>
                           </div>
@@ -1430,14 +1398,6 @@ export default function Catalog() {
                                   method, make sure to take a screenshot of the
                                   payment receipt. You'll need to send this
                                   screenshot along with your order details.
-                                </p>
-                                <p className="text-xs font-medium mt-4">
-                                  FOR DELIVERIES:
-                                </p>
-                                <p className="text-xs mt-1">
-                                  You will be making another payment for the
-                                  delivery fee once we receive the initial
-                                  payment and order details.
                                 </p>
                               </div>
                             </div>
@@ -1574,7 +1534,9 @@ export default function Catalog() {
                               Delivery Fee:
                             </span>
                             <span className="text-sm text-gray-600">
-                              {deliveryOption === "delivery"
+                              {deliveryOption === "delivery" && selectedLocation
+                                ? `₱${deliveryFee}`
+                                : deliveryOption === "shipping"
                                 ? "To be calculated"
                                 : "Free"}
                             </span>
@@ -1585,14 +1547,12 @@ export default function Catalog() {
                                 Total:
                               </span>
                               <span className="text-base font-semibold text-gray-900">
-                                {deliveryOption === "delivery" ||
-                                deliveryOption === "shipping"
-                                  ? `₱${totalAmount}`
-                                  : `₱${
-                                      totalAmount > 0
-                                        ? totalAmount.toLocaleString()
-                                        : "Contact for pricing"
-                                    }`}
+                                {(() => {
+                                  const finalTotal = totalAmount + (deliveryOption === "delivery" && selectedLocation ? deliveryFee : 0);
+                                  return totalAmount > 0
+                                    ? `₱${finalTotal.toLocaleString()}`
+                                    : "Contact for pricing";
+                                })()}
                               </span>
                             </div>
                           </div>
@@ -2073,81 +2033,35 @@ export default function Catalog() {
                       </RadioGroup>
                     </div>
 
-                    {(deliveryOption === "delivery" ||
-                      deliveryOption === "shipping") && (
+                    {deliveryOption === "delivery" && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {deliveryOption === "delivery"
-                            ? "Delivery Address *"
-                            : "Shipping Address *"}
+                          Delivery Address * (Davao City)
                         </label>
                         <div>
                           <DeliveryMapPicker
-                            apiKey={GOOGLE_MAPS_API_KEY}
+                            apiKey={GEOAPIFY_API_KEY}
                             initialLocation={selectedLocation ?? undefined}
-                            onSelect={(loc) => {
-                              setDeliveryAddress(loc.address || "");
-                              handleLocationSelect(loc);
-                            }}
+                            onSelect={handleLocationSelect}
+                            selectedLocation={selectedLocation}
+                            deliveryFee={deliveryFee}
                           />
-
-                          {selectedLocation && (
-                            <div className="mt-2 p-3 bg-white border rounded text-sm">
-                              <div className="mb-1">
-                                <strong className="mr-2">Selected:</strong>
-                                {selectedLocation.address || `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`}
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm">Estimated delivery fee: <strong>₱{deliveryFee}</strong></span>
-                                <a
-                                  className="text-sm text-blue-600 hover:underline"
-                                  href={`https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  Open in Google Maps
-                                </a>
-                                <button
-                                  type="button"
-                                  className="text-sm px-2 py-1 bg-gray-100 rounded"
-                                  onClick={async () => {
-                                    const url = `https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`;
-                                    try {
-                                      await navigator.clipboard.writeText(url);
-                                    } catch (e) {
-                                      const ta = document.createElement('textarea');
-                                      ta.value = url;
-                                      document.body.appendChild(ta);
-                                      ta.select();
-                                      document.execCommand('copy');
-                                      document.body.removeChild(ta);
-                                    }
-                                  }}
-                                >
-                                  Copy map link
-                                </button>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}
 
-                    {deliveryOption === "delivery" && (
-                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                        <div className="flex items-start gap-2">
-                          <span className="text-blue-600">ℹ️</span>
-                          <div>
-                            <p className="text-xs font-medium text-blue-900">
-                              Delivery Fee Calculation
-                            </p>
-                            <p className="text-xs text-blue-800 mt-1">
-                              Available for Davao City only. Delivery fee will
-                              be calculated and communicated after we receive
-                              your order and payment screenshot.
-                            </p>
-                          </div>
-                        </div>
+                    {deliveryOption === "shipping" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Shipping Address * (Domestic)
+                        </label>
+                        <textarea
+                          placeholder="Enter your complete address for J&T shipping"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          rows={3}
+                          value={deliveryAddress}
+                          onChange={(e) => setDeliveryAddress(e.target.value)}
+                        />
                       </div>
                     )}
 
@@ -2219,8 +2133,9 @@ export default function Catalog() {
                           Delivery Fee:
                         </span>
                         <span className="text-xs text-gray-600">
-                          {deliveryOption === "delivery" ||
-                          deliveryOption === "shipping"
+                          {deliveryOption === "delivery" && selectedLocation
+                            ? `₱${deliveryFee}`
+                            : deliveryOption === "shipping"
                             ? "To be calculated"
                             : "Free (Pickup)"}
                         </span>
@@ -2231,14 +2146,12 @@ export default function Catalog() {
                             Total:
                           </span>
                           <span className="text-base font-semibold text-gray-900">
-                            {deliveryOption === "delivery" ||
-                            deliveryOption === "shipping"
-                              ? `₱${totalAmount}`
-                              : `₱${
-                                  totalAmount > 0
-                                    ? totalAmount.toLocaleString()
-                                    : "Contact for pricing"
-                                }`}
+                            {(() => {
+                              const finalTotal = totalAmount + (deliveryOption === "delivery" && selectedLocation ? deliveryFee : 0);
+                              return totalAmount > 0
+                                ? `₱${finalTotal.toLocaleString()}`
+                                : "Contact for pricing";
+                            })()}
                           </span>
                         </div>
                       </div>
@@ -2327,14 +2240,6 @@ export default function Catalog() {
                               method, make sure to take a screenshot of the
                               payment receipt. You'll need to send this
                               screenshot along with your order details.
-                            </p>
-                            <p className="text-xs font-medium mt-4">
-                              FOR DELIVERIES:
-                            </p>
-                            <p className="text-xs mt-1">
-                              You will be making another payment for the
-                              delivery fee once we receive the initial payment
-                              and order details.
                             </p>
                           </div>
                         </div>
@@ -2437,7 +2342,9 @@ export default function Catalog() {
                           Delivery Fee:
                         </span>
                         <span className="text-xs text-gray-600">
-                          {deliveryOption === "delivery"
+                          {deliveryOption === "delivery" && selectedLocation
+                            ? `₱${deliveryFee}`
+                            : deliveryOption === "shipping"
                             ? "To be calculated"
                             : "Free"}
                         </span>
@@ -2448,13 +2355,12 @@ export default function Catalog() {
                             Total:
                           </span>
                           <span className="text-sm font-semibold text-gray-900">
-                            {deliveryOption === "delivery"
-                              ? `₱${totalAmount}`
-                              : `₱${
-                                  totalAmount > 0
-                                    ? totalAmount.toLocaleString()
-                                    : "Contact for pricing"
-                                }`}
+                            {(() => {
+                              const finalTotal = totalAmount + (deliveryOption === "delivery" && selectedLocation ? deliveryFee : 0);
+                              return totalAmount > 0
+                                ? `₱${finalTotal.toLocaleString()}`
+                                : "Contact for pricing";
+                            })()}
                           </span>
                         </div>
                       </div>
