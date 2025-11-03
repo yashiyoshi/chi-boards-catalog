@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import FilterBreadcrumbs from "@/components/custom/filter-breadcrumbs";
 import ProductCard from "@/components/custom/product-card";
 import ProductSkeleton from "@/components/custom/product-skeleton";
+import DeliveryMapPicker from "@/components/custom/delivery-map-picker";
 import { Product } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -144,6 +145,45 @@ export default function Catalog() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedQRImage, setSelectedQRImage] = useState("");
+
+  // Delivery map & fee states
+  const [selectedLocation, setSelectedLocation] = useState<
+    { lat: number; lng: number; address?: string } | null
+  >(null);
+  const [deliveryFee, setDeliveryFee] = useState(0);
+
+  // Pickup coordinates (config via env, fallback to UM Matina example)
+  const PICKUP_LAT = parseFloat(process.env.NEXT_PUBLIC_PICKUP_LAT || "7.0603");
+  const PICKUP_LNG = parseFloat(process.env.NEXT_PUBLIC_PICKUP_LNG || "125.6196");
+
+  const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+
+  // Haversine distance in kilometers
+  const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (v: number) => (v * Math.PI) / 180;
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const computeDeliveryFee = (lat: number, lng: number) => {
+    const distance = haversineKm(PICKUP_LAT, PICKUP_LNG, lat, lng);
+    const kmCeil = Math.ceil(distance || 0);
+    const fee = 40 + kmCeil * 10;
+    return { fee, distance };
+  };
+
+  const handleLocationSelect = (loc: { lat: number; lng: number; address?: string }) => {
+    setSelectedLocation(loc);
+    const { fee } = computeDeliveryFee(loc.lat, loc.lng);
+    setDeliveryFee(fee);
+  };
 
   useEffect(() => {
     const fetchProductsOptimized = async () => {
@@ -1171,19 +1211,58 @@ export default function Catalog() {
                                 ? "Delivery Address *"
                                 : "Shipping Address *"}
                             </label>
-                            <textarea
-                              placeholder={
-                                deliveryOption === "delivery"
-                                  ? "Enter your complete address for Maxim/Grab delivery"
-                                  : "Enter your complete address for J&T shipping"
-                              }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              rows={3}
-                              value={deliveryAddress}
-                              onChange={(e) =>
-                                setDeliveryAddress(e.target.value)
-                              }
-                            />
+                            <div>
+                              <DeliveryMapPicker
+                                apiKey={GOOGLE_MAPS_API_KEY}
+                                initialLocation={
+                                  selectedLocation ?? undefined
+                                }
+                                onSelect={(loc) => {
+                                  setDeliveryAddress(loc.address || "");
+                                  handleLocationSelect(loc);
+                                }}
+                              />
+
+                              {selectedLocation && (
+                                <div className="mt-2 p-3 bg-white border rounded text-sm">
+                                  <div className="mb-1">
+                                    <strong className="mr-2">Selected:</strong>
+                                    {selectedLocation.address || `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`}
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-sm">Estimated delivery fee: <strong>₱{deliveryFee}</strong></span>
+                                    <a
+                                      className="text-sm text-blue-600 hover:underline"
+                                      href={`https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      Open in Google Maps
+                                    </a>
+                                    <button
+                                      type="button"
+                                      className="text-sm px-2 py-1 bg-gray-100 rounded"
+                                      onClick={async () => {
+                                        const url = `https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`;
+                                        try {
+                                          await navigator.clipboard.writeText(url);
+                                        } catch (e) {
+                                          // fallback
+                                          const ta = document.createElement('textarea');
+                                          ta.value = url;
+                                          document.body.appendChild(ta);
+                                          ta.select();
+                                          document.execCommand('copy');
+                                          document.body.removeChild(ta);
+                                        }
+                                      }}
+                                    >
+                                      Copy map link
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
 
@@ -2002,17 +2081,55 @@ export default function Catalog() {
                             ? "Delivery Address *"
                             : "Shipping Address *"}
                         </label>
-                        <textarea
-                          placeholder={
-                            deliveryOption === "delivery"
-                              ? "Enter your complete address for Maxim/Grab delivery"
-                              : "Enter your complete address for J&T shipping"
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          rows={3}
-                          value={deliveryAddress}
-                          onChange={(e) => setDeliveryAddress(e.target.value)}
-                        />
+                        <div>
+                          <DeliveryMapPicker
+                            apiKey={GOOGLE_MAPS_API_KEY}
+                            initialLocation={selectedLocation ?? undefined}
+                            onSelect={(loc) => {
+                              setDeliveryAddress(loc.address || "");
+                              handleLocationSelect(loc);
+                            }}
+                          />
+
+                          {selectedLocation && (
+                            <div className="mt-2 p-3 bg-white border rounded text-sm">
+                              <div className="mb-1">
+                                <strong className="mr-2">Selected:</strong>
+                                {selectedLocation.address || `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`}
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm">Estimated delivery fee: <strong>₱{deliveryFee}</strong></span>
+                                <a
+                                  className="text-sm text-blue-600 hover:underline"
+                                  href={`https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  Open in Google Maps
+                                </a>
+                                <button
+                                  type="button"
+                                  className="text-sm px-2 py-1 bg-gray-100 rounded"
+                                  onClick={async () => {
+                                    const url = `https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`;
+                                    try {
+                                      await navigator.clipboard.writeText(url);
+                                    } catch (e) {
+                                      const ta = document.createElement('textarea');
+                                      ta.value = url;
+                                      document.body.appendChild(ta);
+                                      ta.select();
+                                      document.execCommand('copy');
+                                      document.body.removeChild(ta);
+                                    }
+                                  }}
+                                >
+                                  Copy map link
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
 
