@@ -435,7 +435,12 @@ export default function Catalog() {
       selectedProduct?.hasSheetData &&
       selectedProduct?.price &&
       selectedProduct.price > 0
-        ? totalAmount.toLocaleString()
+        ? (() => {
+            const baseAmount = totalAmount;
+            const deliveryAmount = deliveryOption === "delivery" && selectedLocation ? deliveryFee : 0;
+            const total = baseAmount + deliveryAmount;
+            return total.toLocaleString();
+          })()
         : "Contact for pricing";
     prompt += `₱${finalAmount}\n\n`;
 
@@ -2492,9 +2497,12 @@ export default function Catalog() {
               </p>
               <p className="text-xs text-gray-500 mb-4">
                 Amount: ₱
-                {totalAmount > 0
-                  ? totalAmount.toLocaleString()
-                  : "Contact for pricing"}
+                {(() => {
+                  const finalTotal = totalAmount + (deliveryOption === "delivery" && selectedLocation ? deliveryFee : 0);
+                  return totalAmount > 0
+                    ? finalTotal.toLocaleString()
+                    : "Contact for pricing";
+                })()}
               </p>
 
               {/* Download Button */}
