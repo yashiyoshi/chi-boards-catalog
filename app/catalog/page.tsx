@@ -171,11 +171,13 @@ export default function Catalog() {
     return R * c;
   };
 
-  // Compute delivery fee using Maxim rules: 40 PHP base + 15 PHP per km (rounded up)
+  // Compute delivery fee using per 100m approach: 40 PHP base + 2.4 PHP per 100m (rounded up)
   const computeDeliveryFee = (lat: number, lng: number) => {
-    const distance = haversineKm(PICKUP_LAT, PICKUP_LNG, lat, lng);
-    const fee = 40 + Math.ceil(distance) * 12;
-    return { distance, fee };
+    const distanceKm = haversineKm(PICKUP_LAT, PICKUP_LNG, lat, lng);
+    const distanceMeters = distanceKm * 1000; // Convert km to meters
+    const distance100mUnits = Math.ceil(distanceMeters / 100); // Round up to nearest 100m unit
+    const fee = 40 + distance100mUnits * 2.4;
+    return { distance: distanceKm, fee };
   };
 
   const handleLocationSelect = (loc: { lat: number; lng: number; address?: string }) => {
