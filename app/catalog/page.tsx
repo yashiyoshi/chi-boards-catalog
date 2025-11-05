@@ -176,7 +176,7 @@ export default function Catalog() {
     const distanceKm = haversineKm(PICKUP_LAT, PICKUP_LNG, lat, lng);
     const distanceMeters = distanceKm * 1000; // Convert km to meters
     const distance100mUnits = Math.ceil(distanceMeters / 100); // Round up to nearest 100m unit
-    const fee = 40 + distance100mUnits * 2.4;
+    const fee = Math.ceil(40 + distance100mUnits * 2.4); // Round up final fee to avoid decimals
     return { distance: distanceKm, fee };
   };
 
