@@ -11,7 +11,7 @@ import DeliveryMapPicker from "@/components/custom/delivery-map-picker";
 import { Product } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { cachedFetch } from "@/lib/cache";
+import { cachedFetch, clientCache } from "@/lib/cache";
 import FilterPanel from "@/components/custom/filter-panel";
 
 // Product sorting utility - prioritize Best Seller and On Sale items
@@ -188,9 +188,15 @@ export default function Catalog() {
   };
 
   useEffect(() => {
-    const fetchProductsOptimized = async () => {
+    const fetchProductsOptimized = async (forceRefresh = false) => {
       try {
         setIsLoading(true);
+
+        // Clear stock cache if forcing refresh
+        if (forceRefresh) {
+          clientCache.invalidateStock();
+          console.log("Cache cleared, forcing fresh data...");
+        }
 
         // Phase 1: Load basic product info first (fast)
         console.log("Loading basic product info...");
@@ -202,7 +208,8 @@ export default function Catalog() {
             },
           },
           "basic-products",
-          600
+          600,
+          forceRefresh
         );
 
         // Set basic products immediately for fast initial render with priority sorting
@@ -217,11 +224,12 @@ export default function Catalog() {
             "/api/products/stock",
             {
               headers: {
-                "Cache-Control": "max-age=120",
+                "Cache-Control": "max-age=30",
               },
             },
             "stock-data",
-            120
+            30,  // Reduced from 120 to 30 seconds for fresher inventory data
+            forceRefresh
           );
 
           // Update products with stock and pricing data
@@ -252,13 +260,45 @@ export default function Catalog() {
           );
         } catch (stockError) {
           console.error("Error loading stock data:", stockError);
-          // Remove loading state even if stock data fails
-          setProducts((prevProducts) =>
-            prevProducts.map((product) => ({
-              ...product,
-              isLoadingDetails: false,
-            }))
-          );
+          
+          // Try to use any cached stock data as fallback
+          const cachedStockData = clientCache.getStale<Record<string, any>>("stock-data");
+          if (cachedStockData) {
+            console.log("Using cached stock data as fallback");
+            setProducts((prevProducts) =>
+              sortProductsByPriority(
+                prevProducts.map((product) => {
+                  const normalizedName = product.productName.toLowerCase().trim();
+                  const stockInfo = cachedStockData[normalizedName];
+                  
+                  if (stockInfo) {
+                    return {
+                      ...product,
+                      stock: stockInfo.stock,
+                      price: stockInfo.price,
+                      isInStock: stockInfo.isInStock,
+                      hasSheetData: true,
+                      isLoadingDetails: false,
+                    };
+                  }
+                  
+                  return {
+                    ...product,
+                    hasSheetData: false,
+                    isLoadingDetails: false,
+                  };
+                })
+              )
+            );
+          } else {
+            // Remove loading state even if stock data fails and no cache available
+            setProducts((prevProducts) =>
+              prevProducts.map((product) => ({
+                ...product,
+                isLoadingDetails: false,
+              }))
+            );
+          }
         }
       } catch (error) {
         console.error("Error fetching basic products:", error);
@@ -268,6 +308,12 @@ export default function Catalog() {
     };
 
     fetchProductsOptimized();
+    
+    // Expose refresh function to global scope for debugging
+    if (typeof window !== 'undefined') {
+      (window as any).refreshProducts = () => fetchProductsOptimized(true);
+      (window as any).getCacheStats = () => clientCache.getStats();
+    }
   }, []);
 
   const handleProductClick = (product: Product) => {
